@@ -23,7 +23,9 @@ import (
 
 func TestNew(t *testing.T) {
 	store, err := s3.New()
-	require.Nil(t, err)
+	if err != nil {
+		t.Skip("unable to access S3; skipping test")
+	}
 	assert.Equal(t, "s3", store.Name())
 	store, err = s3.New(s3.WithRegion("us-west-1"), s3.WithID([]byte("west")))
 	require.Nil(t, err)

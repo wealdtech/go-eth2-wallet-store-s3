@@ -20,16 +20,16 @@ import (
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/s3"
 	"github.com/aws/aws-sdk-go/service/s3/s3manager"
+	"github.com/google/uuid"
 	"github.com/pkg/errors"
 	ecodec "github.com/wealdtech/go-ecodec"
-	types "github.com/wealdtech/go-eth2-wallet-types"
 )
 
 // StoreWallet stores wallet-level data.  It will fail if it cannot store the data.
 // Note that this will overwrite any existing data; it is up to higher-level functions to check for the presence of a wallet with
 // the wallet name and handle clashes accordingly.
-func (s *Store) StoreWallet(wallet types.Wallet, data []byte) error {
-	path := s.walletHeaderPath(wallet.Name())
+func (s *Store) StoreWallet(id uuid.UUID, name string, data []byte) error {
+	path := s.walletHeaderPath(name)
 	var err error
 	if len(s.passphrase) > 0 {
 		data, err = ecodec.Encrypt(data, s.passphrase)

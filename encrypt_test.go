@@ -14,125 +14,92 @@
 package s3_test
 
 import (
-	"encoding/json"
 	"fmt"
 	"math/rand"
 	"testing"
 	"time"
 
+	"github.com/google/uuid"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-	keystorev4 "github.com/wealdtech/go-eth2-wallet-encryptor-keystorev4"
-	nd "github.com/wealdtech/go-eth2-wallet-nd"
 	s3 "github.com/wealdtech/go-eth2-wallet-store-s3"
 )
 
 func TestStoreRetrieveEncryptedWallet(t *testing.T) {
-	tests := []struct {
-		name string
-		data []byte
-		err  error
-	}{
-		{
-			name: "WithData",
-			data: []byte{0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00},
-		},
-	}
-
 	rand.Seed(time.Now().Unix())
 	id := fmt.Sprintf("%s-%d", t.Name(), rand.Int31())
 	store, err := s3.New(s3.WithID([]byte(id)), s3.WithPassphrase([]byte("test")))
-	require.Nil(t, err)
-	encryptor := keystorev4.New()
-	wallet, err := nd.CreateWallet("test", store, encryptor)
-	require.Nil(t, err)
-
-	for _, test := range tests {
-		t.Run(test.name, func(t *testing.T) {
-			err := store.StoreWallet(wallet, test.data)
-			if test.err != nil {
-				require.NotNil(t, err)
-				assert.Equal(t, test.err.Error(), err.Error())
-			} else {
-				require.Nil(t, err)
-				data, err := store.RetrieveWallet("test")
-				require.Nil(t, err)
-				assert.Equal(t, test.data, data)
-
-				wallets := false
-				for range store.RetrieveWallets() {
-					wallets = true
-				}
-				assert.True(t, wallets)
-
-			}
-		})
+	if err != nil {
+		t.Skip("unable to access S3; skipping test")
 	}
+
+	walletID := uuid.New()
+	walletName := "test"
+	data := []byte(fmt.Sprintf(`{"id":%q,"name":%q}`, walletID, walletName))
+
+	err = store.StoreWallet(walletID, walletName, data)
+	require.Nil(t, err)
+	retData, err := store.RetrieveWallet(walletName)
+	require.Nil(t, err)
+	assert.Equal(t, data, retData)
+
+	wallets := false
+	for range store.RetrieveWallets() {
+		wallets = true
+	}
+	assert.True(t, wallets)
 
 	store.RetrieveWallets()
 }
 
 func TestStoreRetrieveEncryptedAccount(t *testing.T) {
-	tests := []struct {
-		name string
-		data []byte
-		err  error
-	}{
-		{
-			name: "WithData",
-			data: []byte{0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00},
-		},
-	}
-
 	rand.Seed(time.Now().Unix())
 	id := fmt.Sprintf("%s-%d", t.Name(), rand.Int31())
 	store, err := s3.New(s3.WithID([]byte(id)), s3.WithPassphrase([]byte("test")))
-	require.Nil(t, err)
-	encryptor := keystorev4.New()
-	wallet, err := nd.CreateWallet("test", store, encryptor)
-	require.Nil(t, err)
-	wallet.Unlock(nil)
-	require.Nil(t, err)
-
-	for _, test := range tests {
-		t.Run(test.name, func(t *testing.T) {
-			account, err := wallet.CreateAccount(test.name, nil)
-			require.Nil(t, err)
-			data, err := store.RetrieveAccount(wallet, test.name)
-			require.Nil(t, err)
-			accData, err := json.Marshal(account)
-			require.Nil(t, err)
-			assert.Equal(t, accData, data)
-
-			accounts := false
-			for range store.RetrieveAccounts(wallet) {
-				accounts = true
-			}
-			assert.True(t, accounts)
-		})
+	if err != nil {
+		t.Skip("unable to access S3; skipping test")
 	}
 
-	store.RetrieveWallets()
+	walletID := uuid.New()
+	walletName := "test wallet"
+	accountID := uuid.New()
+	accountName := "test account"
+	data := []byte(fmt.Sprintf(`{"name":"%s","id":"%s"}`, accountName, accountID.String()))
+
+	err = store.StoreWallet(walletID, walletName, data)
+	require.Nil(t, err)
+
+	err = store.StoreAccount(walletID, walletName, accountID, accountName, data)
+	require.Nil(t, err)
+	retData, err := store.RetrieveAccount(walletID, walletName, accountName)
+	require.Nil(t, err)
+	require.Equal(t, data, retData)
+
+	accounts := false
+	for range store.RetrieveAccounts(walletID, walletName) {
+		accounts = true
+	}
+	assert.True(t, accounts)
 }
 
 func TestBadWalletKey(t *testing.T) {
 	rand.Seed(time.Now().Unix())
 	id := fmt.Sprintf("%s-%d", t.Name(), rand.Int31())
 	store, err := s3.New(s3.WithID([]byte(id)), s3.WithPassphrase([]byte("test")))
-	require.Nil(t, err)
-	encryptor := keystorev4.New()
-	wallet, err := nd.CreateWallet("test", store, encryptor)
-	require.Nil(t, err)
+	if err != nil {
+		t.Skip("unable to access S3; skipping test")
+	}
 
-	data, err := json.Marshal(wallet)
-	require.Nil(t, err)
+	walletID := uuid.New()
+	walletName := "test wallet"
+	data := []byte(fmt.Sprintf(`{"id":%q,"name":%q}`, walletID, walletName))
 
-	err = store.StoreWallet(wallet, data)
+	err = store.StoreWallet(walletID, walletName, data)
 	require.Nil(t, err)
 
 	// Open wallet with store with different key; should fail
 	store, err = s3.New(s3.WithID([]byte(id)), s3.WithPassphrase([]byte("badkey")))
 	require.Nil(t, err)
-	_, err = nd.OpenWallet("test", store, encryptor)
+	_, err = store.RetrieveWallet(walletName)
 	require.NotNil(t, err)
 }
