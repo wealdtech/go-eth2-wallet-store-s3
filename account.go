@@ -41,7 +41,7 @@ func (s *Store) StoreAccount(walletID uuid.UUID, walletName string, accountID uu
 	if err == nil {
 		// It does; they need to have the same ID for us to overwrite it
 		info := &struct {
-			ID string `json:"id"`
+			ID string `json:"uuid"`
 		}{}
 		err := json.Unmarshal(existingAccount, info)
 		if err != nil {

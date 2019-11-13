@@ -35,7 +35,7 @@ func TestStoreRetrieveEncryptedWallet(t *testing.T) {
 
 	walletID := uuid.New()
 	walletName := "test"
-	data := []byte(fmt.Sprintf(`{"id":%q,"name":%q}`, walletID, walletName))
+	data := []byte(fmt.Sprintf(`{"uuid":%q,"name":%q}`, walletID, walletName))
 
 	err = store.StoreWallet(walletID, walletName, data)
 	require.Nil(t, err)
@@ -64,7 +64,7 @@ func TestStoreRetrieveEncryptedAccount(t *testing.T) {
 	walletName := "test wallet"
 	accountID := uuid.New()
 	accountName := "test account"
-	data := []byte(fmt.Sprintf(`{"name":"%s","id":"%s"}`, accountName, accountID.String()))
+	data := []byte(fmt.Sprintf(`{"name":%q,"uuid":%q}`, accountName, accountID.String()))
 
 	err = store.StoreWallet(walletID, walletName, data)
 	require.Nil(t, err)
@@ -92,7 +92,7 @@ func TestBadWalletKey(t *testing.T) {
 
 	walletID := uuid.New()
 	walletName := "test wallet"
-	data := []byte(fmt.Sprintf(`{"id":%q,"name":%q}`, walletID, walletName))
+	data := []byte(fmt.Sprintf(`{"uuid":%q,"name":%q}`, walletID, walletName))
 
 	err = store.StoreWallet(walletID, walletName, data)
 	require.Nil(t, err)
