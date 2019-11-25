@@ -62,21 +62,22 @@ func TestStoreRetrieveEncryptedAccount(t *testing.T) {
 
 	walletID := uuid.New()
 	walletName := "test wallet"
+	walletData := []byte(fmt.Sprintf(`{"name":%q,"uuid":%q}`, walletName, walletID.String()))
 	accountID := uuid.New()
 	accountName := "test account"
-	data := []byte(fmt.Sprintf(`{"name":%q,"uuid":%q}`, accountName, accountID.String()))
+	accountData := []byte(fmt.Sprintf(`{"name":%q,"uuid":%q}`, accountName, accountID.String()))
 
-	err = store.StoreWallet(walletID, walletName, data)
+	err = store.StoreWallet(walletID, walletName, walletData)
 	require.Nil(t, err)
 
-	err = store.StoreAccount(walletID, walletName, accountID, accountName, data)
+	err = store.StoreAccount(walletID, accountID, accountName, accountData)
 	require.Nil(t, err)
-	retData, err := store.RetrieveAccount(walletID, walletName, accountName)
+	retData, err := store.RetrieveAccount(walletID, accountName)
 	require.Nil(t, err)
-	require.Equal(t, data, retData)
+	require.Equal(t, accountData, retData)
 
 	accounts := false
-	for range store.RetrieveAccounts(walletID, walletName) {
+	for range store.RetrieveAccounts(walletID) {
 		accounts = true
 	}
 	assert.True(t, accounts)

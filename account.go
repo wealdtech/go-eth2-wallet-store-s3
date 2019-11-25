@@ -16,7 +16,6 @@ package s3
 import (
 	"bytes"
 	"encoding/json"
-	"fmt"
 	"strings"
 
 	"github.com/aws/aws-sdk-go/aws"
@@ -24,20 +23,20 @@ import (
 	"github.com/aws/aws-sdk-go/service/s3/s3manager"
 	"github.com/google/uuid"
 	"github.com/pkg/errors"
-	ecodec "github.com/wealdtech/go-ecodec"
 )
 
 // StoreAccount stores an account.  It will fail if it cannot store the data.
 // Note this will overwrite an existing account with the same ID.  It will not, however, allow multiple accounts with the same
 // name to co-exist in the same wallet.
-func (s *Store) StoreAccount(walletID uuid.UUID, walletName string, accountID uuid.UUID, accountName string, data []byte) error {
+func (s *Store) StoreAccount(walletID uuid.UUID, accountID uuid.UUID, accountName string, data []byte) error {
 	// Ensure the wallet exists
-	if _, err := s.RetrieveWallet(walletName); err != nil {
-		return errors.Wrapf(err, "no wallet %q", walletName)
+	_, err := s.RetrieveWalletByID(walletID)
+	if err != nil {
+		return errors.New("unknown wallet")
 	}
 
 	// See if an account with this name already exists
-	existingAccount, err := s.RetrieveAccount(walletID, walletName, accountName)
+	existingAccount, err := s.RetrieveAccount(walletID, accountName)
 	if err == nil {
 		// It does; they need to have the same ID for us to overwrite it
 		info := &struct {
@@ -48,18 +47,16 @@ func (s *Store) StoreAccount(walletID uuid.UUID, walletName string, accountID uu
 			return err
 		}
 		if info.ID != accountID.String() {
-			return fmt.Errorf("account %q already exists", accountName)
+			return errors.New("account already exists")
 		}
 	}
 
-	if len(s.passphrase) > 0 {
-		data, err = ecodec.Encrypt(data, s.passphrase)
-		if err != nil {
-			return err
-		}
+	data, err = s.encryptIfRequired(data)
+	if err != nil {
+		return err
 	}
 
-	path := s.accountPath(walletName, accountName)
+	path := s.accountPath(walletID, accountID)
 	uploader := s3manager.NewUploader(s.session)
 	_, err = uploader.Upload(&s3manager.UploadInput{
 		Bucket: aws.String(s.bucket),
@@ -73,28 +70,36 @@ func (s *Store) StoreAccount(walletID uuid.UUID, walletName string, accountID uu
 }
 
 // RetrieveAccount retrieves account-level data.  It will fail if it cannot retrieve the data.
-func (s *Store) RetrieveAccount(walletID uuid.UUID, walletName string, accountName string) ([]byte, error) {
-	path := s.accountPath(walletName, accountName)
-	downloader := s3manager.NewDownloader(s.session)
-	buf := aws.NewWriteAtBuffer([]byte{})
-	_, err := downloader.Download(buf,
-		&s3.GetObjectInput{
-			Bucket: aws.String(s.bucket),
-			Key:    aws.String(path),
-		})
-	data := buf.Bytes()
-	if len(s.passphrase) > 0 {
-		data, err = ecodec.Decrypt(data, s.passphrase)
-		if err != nil {
-			return nil, fmt.Errorf("unable to decrypt account %q", accountName)
+func (s *Store) RetrieveAccount(walletID uuid.UUID, accountName string) ([]byte, error) {
+	for data := range s.RetrieveAccounts(walletID) {
+		info := &struct {
+			Name string `json:"name"`
+		}{}
+		err := json.Unmarshal(data, info)
+		if err == nil && info.Name == accountName {
+			return data, nil
 		}
 	}
-	return data, err
+	return nil, errors.New("account not found")
+}
+
+// RetrieveAccountByID retrieves account-level data.  It will fail if it cannot retrieve the data.
+func (s *Store) RetrieveAccountByID(walletID uuid.UUID, accountID uuid.UUID) ([]byte, error) {
+	for data := range s.RetrieveAccounts(walletID) {
+		info := &struct {
+			ID uuid.UUID `json:"uuid"`
+		}{}
+		err := json.Unmarshal(data, info)
+		if err == nil && info.ID == accountID {
+			return data, nil
+		}
+	}
+	return nil, errors.New("account not found")
 }
 
 // RetrieveAccounts retrieves all account-level data for a wallet.
-func (s *Store) RetrieveAccounts(id uuid.UUID, name string) <-chan []byte {
-	path := s.walletPath(name)
+func (s *Store) RetrieveAccounts(walletID uuid.UUID) <-chan []byte {
+	path := s.walletPath(walletID)
 	ch := make(chan []byte, 1024)
 	go func() {
 		conn := s3.New(s.session)
@@ -103,14 +108,13 @@ func (s *Store) RetrieveAccounts(id uuid.UUID, name string) <-chan []byte {
 			Prefix: aws.String(path + "/"),
 		})
 		if err == nil {
-			headerPath := s.walletHeaderPath(name)
 			for _, item := range resp.Contents {
 				if strings.HasSuffix(*item.Key, "/") {
 					// Directory
 					continue
 				}
-				if *item.Key == headerPath {
-					// Header
+				if strings.HasSuffix(*item.Key, walletID.String()) {
+					// Wallet
 					continue
 				}
 				buf := aws.NewWriteAtBuffer([]byte{})
@@ -120,16 +124,14 @@ func (s *Store) RetrieveAccounts(id uuid.UUID, name string) <-chan []byte {
 						Bucket: aws.String(s.bucket),
 						Key:    aws.String(*item.Key),
 					})
-				if err == nil {
-					data := buf.Bytes()
-					if len(s.passphrase) > 0 {
-						data, err = ecodec.Decrypt(data, s.passphrase)
-						if err != nil {
-							continue
-						}
-					}
-					ch <- data
+				if err != nil {
+					continue
 				}
+				data, err := s.decryptIfRequired(buf.Bytes())
+				if err != nil {
+					continue
+				}
+				ch <- data
 			}
 		}
 		close(ch)

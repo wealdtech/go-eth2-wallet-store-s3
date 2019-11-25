@@ -15,27 +15,24 @@ package s3
 
 import (
 	"bytes"
-	"strings"
+	"encoding/json"
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/s3"
 	"github.com/aws/aws-sdk-go/service/s3/s3manager"
 	"github.com/google/uuid"
 	"github.com/pkg/errors"
-	ecodec "github.com/wealdtech/go-ecodec"
 )
 
 // StoreWallet stores wallet-level data.  It will fail if it cannot store the data.
 // Note that this will overwrite any existing data; it is up to higher-level functions to check for the presence of a wallet with
 // the wallet name and handle clashes accordingly.
 func (s *Store) StoreWallet(id uuid.UUID, name string, data []byte) error {
-	path := s.walletHeaderPath(name)
+	path := s.walletHeaderPath(id)
 	var err error
-	if len(s.passphrase) > 0 {
-		data, err = ecodec.Encrypt(data, s.passphrase)
-		if err != nil {
-			return errors.Wrap(err, "failed to encrypt wallet")
-		}
+	data, err = s.encryptIfRequired(data)
+	if err != nil {
+		return errors.Wrap(err, "failed to encrypt wallet")
 	}
 	uploader := s3manager.NewUploader(s.session)
 	_, err = uploader.Upload(&s3manager.UploadInput{
@@ -51,41 +48,40 @@ func (s *Store) StoreWallet(id uuid.UUID, name string, data []byte) error {
 
 // RetrieveWallet retrieves wallet-level data.  It will fail if it cannot retrieve the data.
 func (s *Store) RetrieveWallet(walletName string) ([]byte, error) {
-	path := s.walletHeaderPath(walletName)
-	downloader := s3manager.NewDownloader(s.session)
-	buf := aws.NewWriteAtBuffer([]byte{})
-	_, err := downloader.Download(buf,
-		&s3.GetObjectInput{
-			Bucket: aws.String(s.bucket),
-			Key:    aws.String(path),
-		})
-	if err != nil {
-		return nil, err
-	}
-	data := buf.Bytes()
-	if len(s.passphrase) > 0 {
-		data, err = ecodec.Decrypt(data, s.passphrase)
-		if err != nil {
-			return nil, errors.Wrap(err, "failed to decrypt wallet")
+	for data := range s.RetrieveWallets() {
+		info := &struct {
+			Name string `json:"name"`
+		}{}
+		err := json.Unmarshal(data, info)
+		if err == nil && info.Name == walletName {
+			return data, nil
 		}
 	}
-	return data, nil
+	return nil, errors.New("wallet not found")
+}
+
+// RetrieveWalletByID retrieves wallet-level data.  It will fail if it cannot retrieve the data.
+func (s *Store) RetrieveWalletByID(walletID uuid.UUID) ([]byte, error) {
+	for data := range s.RetrieveWallets() {
+		info := &struct {
+			ID uuid.UUID `json:"uuid"`
+		}{}
+		err := json.Unmarshal(data, info)
+		if err == nil && info.ID == walletID {
+			return data, nil
+		}
+	}
+	return nil, errors.New("wallet not found")
 }
 
 // RetrieveWallets retrieves wallet-level data for all wallets.
 func (s *Store) RetrieveWallets() <-chan []byte {
 	ch := make(chan []byte, 1024)
 	go func() {
-		// We don't know the wallet name but need the last component of the encoded path for the header
-		walletHeaderKey := strings.Split(s.walletHeaderPath(""), "/")[1]
-
 		conn := s3.New(s.session)
 		resp, err := conn.ListObjectsV2(&s3.ListObjectsV2Input{Bucket: aws.String(s.bucket)})
 		if err == nil {
 			for _, item := range resp.Contents {
-				if !strings.HasSuffix(*item.Key, walletHeaderKey) {
-					continue
-				}
 				buf := aws.NewWriteAtBuffer([]byte{})
 				downloader := s3manager.NewDownloader(s.session)
 				_, err := downloader.Download(buf,
@@ -93,16 +89,14 @@ func (s *Store) RetrieveWallets() <-chan []byte {
 						Bucket: aws.String(s.bucket),
 						Key:    aws.String(*item.Key),
 					})
-				if err == nil {
-					data := buf.Bytes()
-					if len(s.passphrase) > 0 {
-						data, err = ecodec.Decrypt(data, s.passphrase)
-						if err != nil {
-							continue
-						}
-					}
-					ch <- data
+				if err != nil {
+					continue
 				}
+				data, err := s.decryptIfRequired(buf.Bytes())
+				if err != nil {
+					continue
+				}
+				ch <- data
 			}
 		}
 		close(ch)

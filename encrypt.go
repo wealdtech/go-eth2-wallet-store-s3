@@ -9,23 +9,28 @@
 // distributed under the License is distributed on an "AS IS" BASIS,
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
+// limitations under the License.
 
 package s3
 
 import (
-	"fmt"
-
-	"github.com/google/uuid"
+	"github.com/wealdtech/go-ecodec"
 )
 
-func (s *Store) walletPath(walletID uuid.UUID) string {
-	return walletID.String()
+// encryptIfRequired encrypts data if required.
+func (s *Store) encryptIfRequired(data []byte) ([]byte, error) {
+	var err error
+	if len(s.passphrase) > 0 {
+		data, err = ecodec.Encrypt(data, s.passphrase)
+	}
+	return data, err
 }
 
-func (s *Store) walletHeaderPath(walletID uuid.UUID) string {
-	return fmt.Sprintf("%s/%s", s.walletPath(walletID), s.walletPath(walletID))
-}
-
-func (s *Store) accountPath(walletID uuid.UUID, accountID uuid.UUID) string {
-	return fmt.Sprintf("%s/%s", s.walletPath(walletID), accountID.String())
+// decryptIfRequired decrypts data if required.
+func (s *Store) decryptIfRequired(data []byte) ([]byte, error) {
+	var err error
+	if len(s.passphrase) > 0 {
+		data, err = ecodec.Decrypt(data, s.passphrase)
+	}
+	return data, err
 }
