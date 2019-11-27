@@ -47,7 +47,7 @@ func TestStoreRetrieveAccount(t *testing.T) {
 	retData, err := store.RetrieveAccount(walletID, accountName)
 	require.Nil(t, err)
 	assert.Equal(t, accountData, retData)
-	retData, err := store.RetrieveAccountByID(walletID, accountID)
+	retData, err = store.RetrieveAccountByID(walletID, accountID)
 	require.Nil(t, err)
 	assert.Equal(t, accountData, retData)
 
