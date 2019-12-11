@@ -8,6 +8,6 @@ require (
 	github.com/pkg/errors v0.8.1
 	github.com/stretchr/testify v1.4.0
 	github.com/wealdtech/go-ecodec v1.0.0
-	github.com/wealdtech/go-eth2-util v1.0.0
+	github.com/wealdtech/go-eth2-util v1.1.0
 	github.com/wealdtech/go-eth2-wallet-types v1.5.0
 )
