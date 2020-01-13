@@ -1,4 +1,4 @@
-// Copyright © 2019 Weald Technology Trading
+// Copyright 2019, 2020 Weald Technology Trading
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -28,4 +28,8 @@ func (s *Store) walletHeaderPath(walletID uuid.UUID) string {
 
 func (s *Store) accountPath(walletID uuid.UUID, accountID uuid.UUID) string {
 	return fmt.Sprintf("%s/%s", s.walletPath(walletID), accountID.String())
+}
+
+func (s *Store) walletIndexPath(walletID uuid.UUID) string {
+	return fmt.Sprintf("%s/index", s.walletPath(walletID))
 }

@@ -1,4 +1,4 @@
-// Copyright © 2019 Weald Technology Trading
+// Copyright 2019, 2020 Weald Technology Trading
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -15,11 +15,7 @@ package s3_test
 
 import (
 	"fmt"
-	"math/rand"
-	"os"
-	"path/filepath"
 	"testing"
-	"time"
 
 	"github.com/google/uuid"
 	"github.com/stretchr/testify/assert"
@@ -28,9 +24,6 @@ import (
 )
 
 func TestStoreRetrieveWallet(t *testing.T) {
-	rand.Seed(time.Now().Unix())
-	path := filepath.Join(os.TempDir(), fmt.Sprintf("TestStoreRetrieveWallet-%d", rand.Int31()))
-	defer os.RemoveAll(path)
 	store, err := s3.New()
 	if err != nil {
 		t.Skip("unable to access S3; skipping test")

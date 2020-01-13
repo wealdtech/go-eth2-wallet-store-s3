@@ -1,4 +1,4 @@
-// Copyright © 2019 Weald Technology Trading
+// Copyright 2019, 2020 Weald Technology Trading
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -42,18 +42,15 @@ func TestStoreRetrieveAccount(t *testing.T) {
 
 	err = store.StoreWallet(walletID, walletName, walletData)
 	require.Nil(t, err)
-	err = store.StoreAccount(walletID, accountID, accountName, accountData)
+	err = store.StoreAccount(walletID, accountID, accountData)
 	require.Nil(t, err)
-	retData, err := store.RetrieveAccount(walletID, accountName)
-	require.Nil(t, err)
-	assert.Equal(t, accountData, retData)
-	retData, err = store.RetrieveAccountByID(walletID, accountID)
+	retData, err := store.RetrieveAccount(walletID, accountID)
 	require.Nil(t, err)
 	assert.Equal(t, accountData, retData)
 
 	store.RetrieveWallets()
 
-	_, err = store.RetrieveAccount(walletID, "not present")
+	_, err = store.RetrieveAccount(walletID, uuid.New())
 	assert.NotNil(t, err)
 }
 
@@ -74,15 +71,11 @@ func TestDuplicateAccounts(t *testing.T) {
 
 	err = store.StoreWallet(walletID, walletName, walletData)
 	require.Nil(t, err)
-	err = store.StoreAccount(walletID, accountID, accountName, accountData)
+	err = store.StoreAccount(walletID, accountID, accountData)
 	require.Nil(t, err)
 
-	// Try to store account with the same name but different ID; should fail
-	err = store.StoreAccount(walletID, uuid.New(), accountName, accountData)
-	assert.NotNil(t, err)
-
 	// Try to store account with the same name and same ID; should succeed
-	err = store.StoreAccount(walletID, accountID, accountName, accountData)
+	err = store.StoreAccount(walletID, accountID, accountData)
 	assert.Nil(t, err)
 }
 
@@ -95,12 +88,8 @@ func TestRetrieveNonExistentAccount(t *testing.T) {
 	}
 
 	walletID := uuid.New()
-	accountName := "test account"
 
-	_, err = store.RetrieveAccount(walletID, accountName)
-	assert.NotNil(t, err)
-
-	_, err = store.RetrieveAccountByID(walletID, uuid.New())
+	_, err = store.RetrieveAccount(walletID, uuid.New())
 	assert.NotNil(t, err)
 }
 
@@ -117,6 +106,6 @@ func TestStoreNonExistentAccount(t *testing.T) {
 	accountName := "test account"
 	data := []byte(fmt.Sprintf(`"uuid":%q,"name":%q}`, accountID, accountName))
 
-	err = store.StoreAccount(walletID, accountID, accountName, data)
+	err = store.StoreAccount(walletID, accountID, data)
 	assert.NotNil(t, err)
 }
