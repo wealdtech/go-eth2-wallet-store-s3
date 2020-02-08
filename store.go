@@ -135,3 +135,8 @@ func New(opts ...Option) (types.Store, error) {
 func (s *Store) Name() string {
 	return "s3"
 }
+
+// Location returns the location of this store.
+func (s *Store) Location() string {
+	return s.bucket
+}
