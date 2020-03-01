@@ -23,7 +23,7 @@ import (
 	"github.com/aws/aws-sdk-go/service/s3"
 	"github.com/pkg/errors"
 	util "github.com/wealdtech/go-eth2-util"
-	types "github.com/wealdtech/go-eth2-wallet-types"
+	wtypes "github.com/wealdtech/go-eth2-wallet-types/v2"
 )
 
 // options are the options for the S3 store
@@ -79,7 +79,7 @@ type Store struct {
 //  - region: a string specifying the Amazon S3 region, defaults to "us-east-1", set with WithRegion()
 //  - id: a byte array specifying an identifying key for the store, defaults to nil, set with WithID()
 // This expects the access credentials to be in a standard place, e.g. ~/.aws/credentials
-func New(opts ...Option) (types.Store, error) {
+func New(opts ...Option) (wtypes.Store, error) {
 	options := options{
 		region: "us-east-1",
 	}

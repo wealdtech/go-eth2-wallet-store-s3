@@ -19,7 +19,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	s3 "github.com/wealdtech/go-eth2-wallet-store-s3"
-	types "github.com/wealdtech/go-eth2-wallet-types"
+	wtypes "github.com/wealdtech/go-eth2-wallet-types/v2"
 )
 
 func TestNew(t *testing.T) {
@@ -35,7 +35,7 @@ func TestNew(t *testing.T) {
 	require.Nil(t, err)
 	assert.Equal(t, "s3", store.Name())
 
-	storeLocationProvider, ok := store.(types.StoreLocationProvider)
+	storeLocationProvider, ok := store.(wtypes.StoreLocationProvider)
 	assert.True(t, ok)
 	assert.Equal(t, "67038ae26ce874153859c347eebba98cebd31639b3a959c42d6b47e0452b185", storeLocationProvider.Location())
 }
