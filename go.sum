@@ -5,6 +5,8 @@ github.com/OneOfOne/xxhash v1.2.2/go.mod h1:HSdplMjZKSmBqAxg5vPj2TmRDmfkzw+cTzAE
 github.com/antihax/optional v0.0.0-20180407024304-ca021399b1a6/go.mod h1:V8iCPQYkqmusNa815XgQio277wI47sdRh1dUOLdyC6Q=
 github.com/aws/aws-sdk-go v1.31.7 h1:TCA+pXKvzDMA3vVqhK21cCy5GarC8pTQb/DrVOWI3iY=
 github.com/aws/aws-sdk-go v1.31.7/go.mod h1:5zCpMtNQVjRREroY7sYe8lOMRSxkhG6MZveU8YkpAk0=
+github.com/aws/aws-sdk-go v1.32.6 h1:HoswAabUWgnrUF7X/9dr4WRgrr8DyscxXvTDm7Qw/5c=
+github.com/aws/aws-sdk-go v1.32.6/go.mod h1:5zCpMtNQVjRREroY7sYe8lOMRSxkhG6MZveU8YkpAk0=
 github.com/census-instrumentation/opencensus-proto v0.2.1/go.mod h1:f6KPmirojxKA12rnyqOA5BBL4O983OfeGPqjHWSTneU=
 github.com/cespare/xxhash v1.1.0 h1:a6HrQnmkObjyL+Gs60czilIUGqrzKutQD6XZog3p+ko=
 github.com/cespare/xxhash v1.1.0/go.mod h1:XrSqR1VqqWfGrhpAt58auRo0WTKS1nRRg3ghfAqPWnc=
@@ -37,6 +39,8 @@ github.com/google/uuid v1.1.1/go.mod h1:TIyPZe4MgqvfeYDBFedMoGGpEw/LqOeaOT+nhxU+
 github.com/grpc-ecosystem/grpc-gateway v1.13.0/go.mod h1:8XEsbTttt/W+VvjtQhLACqCisSPWTxCZ7sBRjU6iH9c=
 github.com/herumi/bls-eth-go-binary v0.0.0-20200618063237-4d3c66ab099d h1:ZLYUT27mOTH+ogU6Sov6xs1zqYi9cRJ6ksBEELXC8R4=
 github.com/herumi/bls-eth-go-binary v0.0.0-20200618063237-4d3c66ab099d/go.mod h1:luAnRm3OsMQeokhGzpYmc0ZKwawY7o87PUEP11Z7r7U=
+github.com/herumi/bls-eth-go-binary v0.0.0-20200621110855-298ffb6847bc h1:1ANh6XSZu8Quo4d03TDFhqiFjgUicMdavTtPm6B+RfE=
+github.com/herumi/bls-eth-go-binary v0.0.0-20200621110855-298ffb6847bc/go.mod h1:luAnRm3OsMQeokhGzpYmc0ZKwawY7o87PUEP11Z7r7U=
 github.com/jmespath/go-jmespath v0.3.0 h1:OS12ieG61fsCg5+qLJ+SsW9NicxNkg3b25OyT2yCeUc=
 github.com/jmespath/go-jmespath v0.3.0/go.mod h1:9QtRXoHjLGCJ5IBSaohpXITPlowMeeYCZ7fLUTSywik=
 github.com/kisielk/errcheck v1.2.0/go.mod h1:/BMXB+zMLi60iA8Vv6Ksmxu/1UDYcXs4uQLJ+jE2L00=
@@ -60,9 +64,13 @@ github.com/prometheus/client_model v0.0.0-20190812154241-14fe0d1b01d4/go.mod h1:
 github.com/protolambda/zssz v0.1.3/go.mod h1:a4iwOX5FE7/JkKA+J/PH0Mjo9oXftN6P8NZyL28gpag=
 github.com/protolambda/zssz v0.1.4 h1:4jkt8sqwhOVR8B1JebREU/gVX0Ply4GypsV8+RWrDuw=
 github.com/protolambda/zssz v0.1.4/go.mod h1:a4iwOX5FE7/JkKA+J/PH0Mjo9oXftN6P8NZyL28gpag=
+github.com/protolambda/zssz v0.1.5 h1:7fjJjissZIIaa2QcvmhS/pZISMX21zVITt49sW1ouek=
+github.com/protolambda/zssz v0.1.5/go.mod h1:a4iwOX5FE7/JkKA+J/PH0Mjo9oXftN6P8NZyL28gpag=
 github.com/prysmaticlabs/go-bitfield v0.0.0-20191017011753-53b773adde52/go.mod h1:hCwmef+4qXWjv0jLDbQdWnL0Ol7cS7/lCSS26WR+u6s=
 github.com/prysmaticlabs/go-bitfield v0.0.0-20200617184054-d57b8c55ea83 h1:HujNkiChDhXhDOlpYtwJu42VFn5Vp1yt+QAEJy03RjU=
 github.com/prysmaticlabs/go-bitfield v0.0.0-20200617184054-d57b8c55ea83/go.mod h1:hCwmef+4qXWjv0jLDbQdWnL0Ol7cS7/lCSS26WR+u6s=
+github.com/prysmaticlabs/go-bitfield v0.0.0-20200618145306-2ae0807bef65 h1:hJfAWrlxx7SKpn4S/h2JGl2HHwA1a2wSS3HAzzZ0F+U=
+github.com/prysmaticlabs/go-bitfield v0.0.0-20200618145306-2ae0807bef65/go.mod h1:hCwmef+4qXWjv0jLDbQdWnL0Ol7cS7/lCSS26WR+u6s=
 github.com/prysmaticlabs/go-ssz v0.0.0-20200101200214-e24db4d9e963 h1:Th5ufPIaL5s/7i3gXHTgiTwfsUhWDP/PwFRiI6qV6v0=
 github.com/prysmaticlabs/go-ssz v0.0.0-20200101200214-e24db4d9e963/go.mod h1:VecIJZrewdAuhVckySLFt2wAAHRME934bSDurP8ftkc=
 github.com/prysmaticlabs/go-ssz v0.0.0-20200612203617-6d5c9aa213ae h1:7qd0Af1ozWKBU3c93YW2RH+/09hJns9+ftqWUZyts9c=
@@ -83,10 +91,16 @@ github.com/wealdtech/go-ecodec v1.1.0 h1:yggrTSckcPJRaxxOxQF7FPm21kgE8WA6+f5jdq5
 github.com/wealdtech/go-ecodec v1.1.0/go.mod h1:PSdBFEB6cltdT7V4E1jbboufMZTZXcQOKG/2PeEjKK4=
 github.com/wealdtech/go-eth2-types/v2 v2.4.1 h1:8Brj7MvJk3EUkYBQ8A5bWLleIc3/W1Jr1tApzTXtW1A=
 github.com/wealdtech/go-eth2-types/v2 v2.4.1/go.mod h1:gqvLvmdw5CaDJUmClvmLRp653Ugf0VlGO9ZoWdi7mLY=
+github.com/wealdtech/go-eth2-types/v2 v2.4.2 h1:EkOvP8Ma0Ru7WIh0haoST97rc0PYm2AJpuWG1HzgfCI=
+github.com/wealdtech/go-eth2-types/v2 v2.4.2/go.mod h1:hhKa4ZFaNU2fwUjEh8GYr8wKg5D1W4QyxZ3xpsb/2hw=
 github.com/wealdtech/go-eth2-util v1.2.1 h1:ReY7XWgTgXf1Fi9MoRLodD1H7rCVMFHMHJKHXoHYNQE=
 github.com/wealdtech/go-eth2-util v1.2.1/go.mod h1:PPhVwXc9gv1omyf/Ik4h97jL77HdCEzlEUX4P5wDqQw=
+github.com/wealdtech/go-eth2-util v1.2.2 h1:LALunpMSJFvu89RHS1zl6RjZ52805utRvd12RtquB54=
+github.com/wealdtech/go-eth2-util v1.2.2/go.mod h1:R3VlTd69B2Jf58s62ChcyXt11ZK1/36CTplTuyR/6dE=
 github.com/wealdtech/go-eth2-wallet-types/v2 v2.1.1 h1:RGvhM7C85ptEdVsCDQNt+fJrF0SrMnUb0gkgtU75ifI=
 github.com/wealdtech/go-eth2-wallet-types/v2 v2.1.1/go.mod h1:608wNFKrwPzwjWeQVRE/rHnHkrRmmTCUhFg2/Bgkbvs=
+github.com/wealdtech/go-eth2-wallet-types/v2 v2.2.0 h1:SfoBlW2LYjW05uHhnTZaezX37gbRsp+VYtxWT6SeAME=
+github.com/wealdtech/go-eth2-wallet-types/v2 v2.2.0/go.mod h1:XEvrlKFnHLbg1tj4Dep76XKASeS13TBpvdeXmvLiH+k=
 github.com/wealdtech/go-indexer v1.0.0 h1:/S4rfWQbSOnnYmwnvuTVatDibZ8o1s9bmTCHO16XINg=
 github.com/wealdtech/go-indexer v1.0.0/go.mod h1:u1cjsbsOXsm5jzJDyLmZY7GsrdX8KYXKBXkZcAmk3Zg=
 golang.org/x/crypto v0.0.0-20190308221718-c2843e01d9a2/go.mod h1:djNgcEr1/C05ACkg1iLfiJU5Ep61QUkGW8qpdssI0+w=
@@ -118,6 +132,8 @@ golang.org/x/sys v0.0.0-20190412213103-97732733099d h1:+R4KGOnez64A81RvjARKc4UT5
 golang.org/x/sys v0.0.0-20190412213103-97732733099d/go.mod h1:h1NjWce9XRLGQEsW7wpKNCjG9DtNlClVuFLEZdDNbEs=
 golang.org/x/sys v0.0.0-20200615200032-f1bc736245b1 h1:ogLJMz+qpzav7lGMh10LMvAkM/fAoGlaiiHYiFYdm80=
 golang.org/x/sys v0.0.0-20200615200032-f1bc736245b1/go.mod h1:h1NjWce9XRLGQEsW7wpKNCjG9DtNlClVuFLEZdDNbEs=
+golang.org/x/sys v0.0.0-20200620081246-981b61492c35 h1:wb/9mP8eUAmHfkM8RmpeLq6nUA7c2i5+bQOtcDftjaE=
+golang.org/x/sys v0.0.0-20200620081246-981b61492c35/go.mod h1:h1NjWce9XRLGQEsW7wpKNCjG9DtNlClVuFLEZdDNbEs=
 golang.org/x/text v0.3.0 h1:g61tztE5qeGQ89tm6NTjjM9VPIm088od1l6aSorWRWg=
 golang.org/x/text v0.3.0/go.mod h1:NqM8EUOU14njkJ3fqMW+pc6Ldnwhi/IjpwHt7yyuwOQ=
 golang.org/x/tools v0.0.0-20181030221726-6c7e314b6563/go.mod h1:n7NCudcB/nEzxVGmLbDWY5pfWTLqBcC2KZ6jyYvM4mQ=
