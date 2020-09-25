@@ -94,6 +94,8 @@ github.com/wealdtech/go-eth2-util v1.3.0 h1:aX1+PnxB904GIf5JE9GRKYPuGQJsCT+Q7PG9
 github.com/wealdtech/go-eth2-util v1.3.0/go.mod h1:nSHpt/mdwn1LyLiNzjGPH1DDIYdBENLFaY1fSRr+aKg=
 github.com/wealdtech/go-eth2-util v1.5.0 h1:b3fgyvoq/WocW9LkWT7zcO5VCKzKLCc97rPrk/B9oIc=
 github.com/wealdtech/go-eth2-util v1.5.0/go.mod h1:0PGWeWWc6qjky/aNjdPdguJdZ2HSEHHCA+3cTjvT+Hk=
+github.com/wealdtech/go-eth2-util v1.6.0 h1:l2OR0SqfYdEnb1I1Ggnk0w+B9/LA5aHdQ2KK2FPnGkY=
+github.com/wealdtech/go-eth2-util v1.6.0/go.mod h1:0PGWeWWc6qjky/aNjdPdguJdZ2HSEHHCA+3cTjvT+Hk=
 github.com/wealdtech/go-eth2-wallet-types/v2 v2.5.0 h1:J29mbkSCUMl2xdu8Lg6U+JptFGfmli6xl04DAHtq9aM=
 github.com/wealdtech/go-eth2-wallet-types/v2 v2.5.0/go.mod h1:X9kYUH/E5YMqFMZ4xL6MJanABUkJGaH/yPZRT2o+yYA=
 github.com/wealdtech/go-indexer v1.0.0 h1:/S4rfWQbSOnnYmwnvuTVatDibZ8o1s9bmTCHO16XINg=
