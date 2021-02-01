@@ -76,6 +76,8 @@ github.com/wealdtech/go-eth2-util v1.6.1 h1:gYW2s6iea/6NoSuSbisMqETpcnQYfqQnpmGL
 github.com/wealdtech/go-eth2-util v1.6.1/go.mod h1:0hCjncDU0yi6dzGgrCgWAj6grdvJ6loEKCGpCMfxo9c=
 github.com/wealdtech/go-eth2-util v1.6.2 h1:Gk7xVTG/bY1IUw/8wxOf97DuPbLTGGoZ0k5dNayudhk=
 github.com/wealdtech/go-eth2-util v1.6.2/go.mod h1:0hCjncDU0yi6dzGgrCgWAj6grdvJ6loEKCGpCMfxo9c=
+github.com/wealdtech/go-eth2-util v1.6.3 h1:2INPeOR35x5LdFFpSzyw954WzTD+DFyHe3yKlJnG5As=
+github.com/wealdtech/go-eth2-util v1.6.3/go.mod h1:0hFMj/qtio288oZFHmAbCnPQ9OB3c4WFzs5NVPKTY4k=
 github.com/wealdtech/go-eth2-wallet-types/v2 v2.8.1 h1:pcvljXdc/CqXl/JAXXtd6Ey5SqfOq9MvQutvM+5wvHQ=
 github.com/wealdtech/go-eth2-wallet-types/v2 v2.8.1/go.mod h1:PWvCKqRknUmOdkXmMLpyW7wBVaAEP5BWSWRph4iWy98=
 github.com/wealdtech/go-eth2-wallet-types/v2 v2.8.2 h1:264/meVYWt1wFw6Mtn+xwkZkXjID42gNra4rycoiDXI=
