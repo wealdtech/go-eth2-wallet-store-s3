@@ -1,4 +1,4 @@
-// Copyright 2019, 2020 Weald Technology Trading
+// Copyright 2019 - 2022 Weald Technology Trading
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -16,6 +16,7 @@ package s3_test
 import (
 	"fmt"
 	"testing"
+	"time"
 
 	"github.com/google/uuid"
 	"github.com/stretchr/testify/assert"
@@ -23,22 +24,48 @@ import (
 	s3 "github.com/wealdtech/go-eth2-wallet-store-s3"
 )
 
-func TestStoreRetrieveWallet(t *testing.T) {
-	store, err := s3.New()
-	if err != nil {
-		t.Skip("unable to access S3; skipping test")
+func TestStoreWallet(t *testing.T) {
+	ts := time.Now().UnixNano()
+	tests := []struct {
+		name string
+		opts []s3.Option
+		err  string
+	}{
+		{
+			name: "Defaults",
+		},
+		{
+			name: "SpecificBucket",
+			opts: []s3.Option{
+				s3.WithBucket(fmt.Sprintf("teststorewallet-specificbucket-%d", ts)),
+			},
+		},
+		{
+			name: "SpecificPath",
+			opts: []s3.Option{
+				s3.WithBucket(fmt.Sprintf("teststorewallet-specificpath-%d", ts)),
+				s3.WithPath("a/b/c"),
+			},
+		},
 	}
 
-	walletID := uuid.New()
-	walletName := "test wallet"
-	data := []byte(fmt.Sprintf(`{"uuid":%q,"name":%q}`, walletID, walletName))
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			store, err := s3.New(test.opts...)
+			require.NoError(t, err)
 
-	err = store.StoreWallet(walletID, walletName, data)
-	require.Nil(t, err)
-	retData, err := store.RetrieveWallet(walletName)
-	require.Nil(t, err)
-	assert.Equal(t, data, retData)
+			walletID := uuid.New()
+			walletName := "test wallet"
+			data := []byte(fmt.Sprintf(`{"uuid":%q,"name":%q}`, walletID, walletName))
+			err = store.StoreWallet(walletID, walletName, data)
+			require.Nil(t, err)
+			retData, err := store.RetrieveWallet(walletName)
+			require.Nil(t, err)
+			assert.Equal(t, data, retData)
 
-	for range store.RetrieveWallets() {
+			for wallet := range store.RetrieveWallets() {
+				require.Equal(t, data, wallet)
+			}
+		})
 	}
 }

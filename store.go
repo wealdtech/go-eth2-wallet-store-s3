@@ -16,6 +16,7 @@ package s3
 import (
 	"encoding/hex"
 	"fmt"
+	"path/filepath"
 	"strings"
 
 	"github.com/aws/aws-sdk-go/aws"
@@ -29,7 +30,10 @@ import (
 // options are the options for the S3 store
 type options struct {
 	id         []byte
+	endpoint   string
 	region     string
+	bucket     string
+	path       string
 	passphrase []byte
 }
 
@@ -58,10 +62,33 @@ func WithID(t []byte) Option {
 	})
 }
 
+// WithEndpoint sets the endpoint for the store
+func WithEndpoint(t string) Option {
+	return optionFunc(func(o *options) {
+		o.endpoint = t
+	})
+}
+
 // WithRegion sets the AWS region for the store
+// This defaults to "us-east-1"
 func WithRegion(t string) Option {
 	return optionFunc(func(o *options) {
 		o.region = t
+	})
+}
+
+// WithBucket sets the bucket for the store
+func WithBucket(t string) Option {
+	return optionFunc(func(o *options) {
+		o.bucket = t
+	})
+}
+
+// WithPath sets the path for the store
+// If not supplied this will default to an accout-specific path
+func WithPath(t string) Option {
+	return optionFunc(func(o *options) {
+		o.path = t
 	})
 }
 
@@ -69,12 +96,12 @@ func WithRegion(t string) Option {
 type Store struct {
 	session    *session.Session
 	id         []byte
-	region     string
 	bucket     string
+	path       string
 	passphrase []byte
 }
 
-// New creates a new Amazon S3 store.
+// New creates a new Amazon S3-compatible store.
 // This takes the following options:
 //  - region: a string specifying the Amazon S3 region, defaults to "us-east-1", set with WithRegion()
 //  - id: a byte array specifying an identifying key for the store, defaults to nil, set with WithID()
@@ -87,7 +114,10 @@ func New(opts ...Option) (wtypes.Store, error) {
 		o.apply(&options)
 	}
 
-	session, err := session.NewSession(&aws.Config{Region: aws.String(options.region)})
+	session, err := session.NewSession(&aws.Config{
+		Region:   aws.String(options.region),
+		Endpoint: aws.String(options.endpoint),
+	})
 	if err != nil {
 		return nil, err
 	}
@@ -99,10 +129,19 @@ func New(opts ...Option) (wtypes.Store, error) {
 	cryptKeyCopy := make([]byte, len(creds.AccessKeyID))
 	copy(cryptKeyCopy, creds.AccessKeyID)
 
-	// Generate a bucket name from the cryptKey.  This will be the SHA256 hash of a string unique to the account, as a hex string
-	// of 63 charaters (as S3 only allows bucket names up to 63 characters in length).
-	hash := util.SHA256([]byte(fmt.Sprintf("Ethereum 2 wallet:%s", creds.AccessKeyID)), options.id)
-	bucket := hex.EncodeToString(hash)[:63]
+	bucket := ""
+	if options.bucket != "" {
+		if len(options.bucket) > 63 {
+			return nil, errors.New("bucket cannot be more than 63 characters in length")
+		}
+		bucket = options.bucket
+	} else {
+		// Generate a bucket name from the cryptKey.  This will be the SHA256 hash of a
+		// string unique to the account, as a hex string of 63 charaters (as S3 only
+		// allows bucket names up to 63 characters in length).
+		hash := util.SHA256([]byte(fmt.Sprintf("Ethereum 2 wallet:%s", creds.AccessKeyID)), options.id)
+		bucket = hex.EncodeToString(hash)[:63]
+	}
 
 	// Check the bucket exists; if not create it
 	conn := s3.New(session)
@@ -122,11 +161,37 @@ func New(opts ...Option) (wtypes.Store, error) {
 		}
 	}
 
+	// Check the path exists; if not create it.
+	pathElements := strings.Split(options.path, "/")
+	path := ""
+	for _, pathElement := range pathElements {
+		if len(pathElement) == 0 {
+			continue
+		}
+		path = filepath.Join(path, pathElement)
+		_, err := conn.GetObject(&s3.GetObjectInput{
+			Bucket: aws.String(bucket),
+			Key:    aws.String(path),
+		})
+		if err != nil {
+			if !strings.Contains(err.Error(), "NoSuchKey") {
+				return nil, errors.Wrap(err, "unable to access path")
+			}
+			_, err := conn.PutObject(&s3.PutObjectInput{
+				Bucket: aws.String(bucket),
+				Key:    aws.String(fmt.Sprintf("%s/", path)),
+			})
+			if err != nil {
+				return nil, errors.Wrap(err, "failed to confirm path creation")
+			}
+		}
+	}
+
 	return &Store{
 		session:    session,
-		region:     options.region,
 		id:         options.id,
 		bucket:     bucket,
+		path:       options.path,
 		passphrase: options.passphrase,
 	}, nil
 }
@@ -138,5 +203,5 @@ func (s *Store) Name() string {
 
 // Location returns the location of this store.
 func (s *Store) Location() string {
-	return s.bucket
+	return filepath.Join(s.bucket, s.path)
 }
