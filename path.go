@@ -1,4 +1,4 @@
-// Copyright 2019, 2020 Weald Technology Trading
+// Copyright 2019 - 2022 Weald Technology Trading
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -17,7 +17,7 @@ import (
 )
 
 func (s *Store) walletPath(walletID uuid.UUID) string {
-	return walletID.String()
+	return join(s.path, walletID.String())
 }
 
 func (s *Store) walletHeaderPath(walletID uuid.UUID) string {
