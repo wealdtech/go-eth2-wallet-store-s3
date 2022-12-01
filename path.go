@@ -21,7 +21,7 @@ func (s *Store) walletPath(walletID uuid.UUID) string {
 }
 
 func (s *Store) walletHeaderPath(walletID uuid.UUID) string {
-	return join(s.walletPath(walletID), s.walletPath(walletID))
+	return join(s.walletPath(walletID), walletID.String())
 }
 
 func (s *Store) accountPath(walletID uuid.UUID, accountID uuid.UUID) string {
