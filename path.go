@@ -21,15 +21,15 @@ func (s *Store) walletPath(walletID uuid.UUID) string {
 }
 
 func (s *Store) walletHeaderPath(walletID uuid.UUID) string {
-	return join(s.path, s.walletPath(walletID), s.walletPath(walletID))
+	return join(s.walletPath(walletID), s.walletPath(walletID))
 }
 
 func (s *Store) accountPath(walletID uuid.UUID, accountID uuid.UUID) string {
-	return join(s.path, s.walletPath(walletID), accountID.String())
+	return join(s.walletPath(walletID), accountID.String())
 }
 
 func (s *Store) walletIndexPath(walletID uuid.UUID) string {
-	return join(s.path, s.walletPath(walletID), "index")
+	return join(s.walletPath(walletID), "index")
 }
 
 // join joins multiple segments of a path.
