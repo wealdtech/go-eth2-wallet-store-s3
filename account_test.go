@@ -1,4 +1,4 @@
-// Copyright 2019-2021 Weald Technology Trading
+// Copyright 2019 - 2022 Weald Technology Trading
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -112,4 +112,53 @@ func TestStoreNonExistentAccount(t *testing.T) {
 
 	err = store.StoreAccount(walletID, accountID, data)
 	assert.NotNil(t, err)
+}
+
+func TestStoreAccount(t *testing.T) {
+	ts := time.Now().UnixNano()
+	tests := []struct {
+		name string
+		opts []s3.Option
+		err  string
+	}{
+		{
+			name: "Defaults",
+		},
+		{
+			name: "SpecificBucket",
+			opts: []s3.Option{
+				s3.WithBucket(fmt.Sprintf("teststoreaccount-specificbucket-%d", ts)),
+			},
+		},
+		{
+			name: "SpecificPath",
+			opts: []s3.Option{
+				s3.WithBucket(fmt.Sprintf("teststoreaccount-specificpath-%d", ts)),
+				s3.WithPath("a/b/c"),
+			},
+		},
+	}
+
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			store, err := s3.New(test.opts...)
+			require.NoError(t, err)
+
+			walletID := uuid.New()
+			walletName := "test wallet"
+			walletData := []byte(fmt.Sprintf(`{"uuid":%q,"name":%q}`, walletID, walletName))
+			require.NoError(t, store.StoreWallet(walletID, walletName, walletData))
+			retData, err := store.RetrieveWallet(walletName)
+			require.NoError(t, err)
+			assert.Equal(t, walletData, retData)
+
+			accountID := uuid.New()
+			accountName := "test account"
+			accountData := []byte(fmt.Sprintf(`{"name":%q,"uuid":%q}`, accountName, accountID.String()))
+			require.NoError(t, store.StoreAccount(walletID, accountID, accountData))
+			retData, err = store.RetrieveAccount(walletID, accountID)
+			require.NoError(t, err)
+			assert.Equal(t, accountData, retData)
+		})
+	}
 }

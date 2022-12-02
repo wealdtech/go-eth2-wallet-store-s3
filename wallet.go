@@ -16,6 +16,7 @@ package s3
 import (
 	"bytes"
 	"encoding/json"
+	"strings"
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/s3"
@@ -79,9 +80,21 @@ func (s *Store) RetrieveWallets() <-chan []byte {
 	ch := make(chan []byte, 1024)
 	go func() {
 		conn := s3.New(s.session)
-		resp, err := conn.ListObjectsV2(&s3.ListObjectsV2Input{Bucket: aws.String(s.bucket)})
+		resp, err := conn.ListObjectsV2(&s3.ListObjectsV2Input{
+			Bucket: aws.String(s.bucket),
+			Prefix: aws.String(s.path),
+		})
 		if err == nil {
 			for _, item := range resp.Contents {
+				if strings.HasSuffix(*item.Key, "/") {
+					// Directory.
+					continue
+				}
+				// This is only a wallet if the last two components of the path are the same.
+				components := strings.Split(*item.Key, "/")
+				if components[len(components)-1] != components[len(components)-2] {
+					continue
+				}
 				buf := aws.NewWriteAtBuffer([]byte{})
 				downloader := s3manager.NewDownloader(s.session)
 				_, err := downloader.Download(buf,

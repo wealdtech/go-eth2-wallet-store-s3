@@ -1,4 +1,4 @@
-// Copyright 2019, 2020 Weald Technology Trading
+// Copyright 2019 - 2022 Weald Technology Trading
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -13,23 +13,37 @@
 package s3
 
 import (
-	"fmt"
-
 	"github.com/google/uuid"
 )
 
 func (s *Store) walletPath(walletID uuid.UUID) string {
-	return walletID.String()
+	return join(s.path, walletID.String())
 }
 
 func (s *Store) walletHeaderPath(walletID uuid.UUID) string {
-	return fmt.Sprintf("%s/%s", s.walletPath(walletID), s.walletPath(walletID))
+	return join(s.walletPath(walletID), walletID.String())
 }
 
 func (s *Store) accountPath(walletID uuid.UUID, accountID uuid.UUID) string {
-	return fmt.Sprintf("%s/%s", s.walletPath(walletID), accountID.String())
+	return join(s.walletPath(walletID), accountID.String())
 }
 
 func (s *Store) walletIndexPath(walletID uuid.UUID) string {
-	return fmt.Sprintf("%s/index", s.walletPath(walletID))
+	return join(s.walletPath(walletID), "index")
+}
+
+// join joins multiple segments of a path.
+func join(elem ...string) string {
+	res := ""
+	for _, e := range elem {
+		if e == "" {
+			continue
+		}
+		if res != "" {
+			res += "/"
+		}
+		res += e
+	}
+
+	return res
 }
