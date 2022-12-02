@@ -107,6 +107,10 @@ type Store struct {
 // This takes the following options:
 //  - region: a string specifying the Amazon S3 region, defaults to "us-east-1", set with WithRegion()
 //  - id: a byte array specifying an identifying key for the store, defaults to nil, set with WithID()
+//  - passphrase: a key used to encrypt all data written to the store, defaults to blank and no additional encryption
+//  - bucket: the name of a bucket to create, defaults to one generated using the credentials and ID
+//  - path: a path inside the bucket in which to place wallets, defaults to the root of the bucket
+//  - endpoint: a URL for an S3-compatible service to use in place of S3 itself
 // This expects the access credentials to be in a standard place, e.g. ~/.aws/credentials
 func New(opts ...Option) (wtypes.Store, error) {
 	options := options{
