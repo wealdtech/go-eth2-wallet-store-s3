@@ -20,6 +20,7 @@ import (
 	"strings"
 
 	"github.com/aws/aws-sdk-go/aws"
+	"github.com/aws/aws-sdk-go/aws/credentials"
 	session "github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/s3"
 	"github.com/pkg/errors"
@@ -29,12 +30,14 @@ import (
 
 // options are the options for the S3 store
 type options struct {
-	id         []byte
-	endpoint   string
-	region     string
-	bucket     string
-	path       string
-	passphrase []byte
+	id                []byte
+	endpoint          string
+	region            string
+	bucket            string
+	path              string
+	passphrase        []byte
+	credentialsID     string
+	credentialsSecret string
 }
 
 // Option gives options to New
@@ -94,6 +97,20 @@ func WithPath(t string) Option {
 	})
 }
 
+// WithCredentialsID sets the credentials ID.
+func WithCredentialsID(t string) Option {
+	return optionFunc(func(o *options) {
+		o.credentialsID = t
+	})
+}
+
+// WithCredentialsSecret sets the credentials secret.
+func WithCredentialsSecret(t string) Option {
+	return optionFunc(func(o *options) {
+		o.credentialsSecret = t
+	})
+}
+
 // Store is the store for the wallet held encrypted on Amazon S3.
 type Store struct {
 	session    *session.Session
@@ -111,7 +128,9 @@ type Store struct {
 //  - bucket: the name of a bucket to create, defaults to one generated using the credentials and ID
 //  - path: a path inside the bucket in which to place wallets, defaults to the root of the bucket
 //  - endpoint: a URL for an S3-compatible service to use in place of S3 itself
-// This expects the access credentials to be in a standard place, e.g. ~/.aws/credentials
+//  - credentials ID: AWS access credentials ID
+//  - credentials secret: AWS access credentials secret
+// If credentials are not supplied, the access credentials should be in a standard place, e.g. ~/.aws/credentials
 func New(opts ...Option) (wtypes.Store, error) {
 	options := options{
 		region: "us-east-1",
@@ -120,10 +139,16 @@ func New(opts ...Option) (wtypes.Store, error) {
 		o.apply(&options)
 	}
 
-	session, err := session.NewSession(&aws.Config{
+	sessionConfig := &aws.Config{
 		Region:   aws.String(options.region),
 		Endpoint: aws.String(options.endpoint),
-	})
+	}
+
+	if len(options.credentialsID) > 0 {
+		sessionConfig.Credentials = credentials.NewStaticCredentials(options.credentialsID, options.credentialsSecret, "")
+	}
+
+	session, err := session.NewSession(sessionConfig)
 	if err != nil {
 		return nil, err
 	}
@@ -132,8 +157,6 @@ func New(opts ...Option) (wtypes.Store, error) {
 	if err != nil {
 		return nil, err
 	}
-	cryptKeyCopy := make([]byte, len(creds.AccessKeyID))
-	copy(cryptKeyCopy, creds.AccessKeyID)
 
 	bucket := ""
 	if options.bucket != "" {

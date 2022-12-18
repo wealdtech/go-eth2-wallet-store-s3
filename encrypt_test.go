@@ -16,6 +16,7 @@ package s3_test
 import (
 	"fmt"
 	"math/rand"
+	"os"
 	"testing"
 	"time"
 
@@ -29,7 +30,11 @@ func TestStoreRetrieveEncryptedWallet(t *testing.T) {
 	rand.Seed(time.Now().Unix())
 	// #nosec G404
 	id := fmt.Sprintf("%s-%d", t.Name(), rand.Int31())
-	store, err := s3.New(s3.WithID([]byte(id)), s3.WithPassphrase([]byte("test")))
+	store, err := s3.New(s3.WithID([]byte(id)),
+		s3.WithPassphrase([]byte("test")),
+		s3.WithCredentialsID(os.Getenv("S3_CREDENTIALS_ID")),
+		s3.WithCredentialsSecret(os.Getenv("S3_CREDENTIALS_SECRET")),
+	)
 	if err != nil {
 		t.Skip("unable to access S3; skipping test")
 	}
@@ -57,7 +62,11 @@ func TestStoreRetrieveEncryptedAccount(t *testing.T) {
 	rand.Seed(time.Now().Unix())
 	// #nosec G404
 	id := fmt.Sprintf("%s-%d", t.Name(), rand.Int31())
-	store, err := s3.New(s3.WithID([]byte(id)), s3.WithPassphrase([]byte("test")))
+	store, err := s3.New(s3.WithID([]byte(id)),
+		s3.WithPassphrase([]byte("test")),
+		s3.WithCredentialsID(os.Getenv("S3_CREDENTIALS_ID")),
+		s3.WithCredentialsSecret(os.Getenv("S3_CREDENTIALS_SECRET")),
+	)
 	if err != nil {
 		t.Skip("unable to access S3; skipping test")
 	}
@@ -89,7 +98,11 @@ func TestBadWalletKey(t *testing.T) {
 	rand.Seed(time.Now().Unix())
 	// #nosec G404
 	id := fmt.Sprintf("%s-%d", t.Name(), rand.Int31())
-	store, err := s3.New(s3.WithID([]byte(id)), s3.WithPassphrase([]byte("test")))
+	store, err := s3.New(s3.WithID([]byte(id)),
+		s3.WithPassphrase([]byte("test")),
+		s3.WithCredentialsID(os.Getenv("S3_CREDENTIALS_ID")),
+		s3.WithCredentialsSecret(os.Getenv("S3_CREDENTIALS_SECRET")),
+	)
 	if err != nil {
 		t.Skip("unable to access S3; skipping test")
 	}
@@ -102,7 +115,11 @@ func TestBadWalletKey(t *testing.T) {
 	require.Nil(t, err)
 
 	// Open wallet with store with different key; should fail
-	store, err = s3.New(s3.WithID([]byte(id)), s3.WithPassphrase([]byte("badkey")))
+	store, err = s3.New(s3.WithID([]byte(id)),
+		s3.WithPassphrase([]byte("badkey")),
+		s3.WithCredentialsID(os.Getenv("S3_CREDENTIALS_ID")),
+		s3.WithCredentialsSecret(os.Getenv("S3_CREDENTIALS_SECRET")),
+	)
 	require.Nil(t, err)
 	_, err = store.RetrieveWallet(walletName)
 	require.NotNil(t, err)

@@ -15,6 +15,7 @@ package s3_test
 
 import (
 	"fmt"
+	"os"
 	"testing"
 	"time"
 
@@ -37,12 +38,16 @@ func TestStoreWallet(t *testing.T) {
 		{
 			name: "SpecificBucket",
 			opts: []s3.Option{
+				s3.WithCredentialsID(os.Getenv("S3_CREDENTIALS_ID")),
+				s3.WithCredentialsSecret(os.Getenv("S3_CREDENTIALS_SECRET")),
 				s3.WithBucket(fmt.Sprintf("teststorewallet-specificbucket-%d", ts)),
 			},
 		},
 		{
 			name: "SpecificPath",
 			opts: []s3.Option{
+				s3.WithCredentialsID(os.Getenv("S3_CREDENTIALS_ID")),
+				s3.WithCredentialsSecret(os.Getenv("S3_CREDENTIALS_SECRET")),
 				s3.WithBucket(fmt.Sprintf("teststorewallet-specificpath-%d", ts)),
 				s3.WithPath("a/b/c"),
 			},

@@ -16,6 +16,7 @@ package s3_test
 import (
 	"fmt"
 	"math/rand"
+	"os"
 	"testing"
 	"time"
 
@@ -29,7 +30,11 @@ func TestStoreRetrieveAccount(t *testing.T) {
 	rand.Seed(time.Now().Unix())
 	//nolint:gosec
 	id := fmt.Sprintf("%s-%d", t.Name(), rand.Int31())
-	store, err := s3.New(s3.WithID([]byte(id)))
+	store, err := s3.New(
+		s3.WithID([]byte(id)),
+		s3.WithCredentialsID(os.Getenv("S3_CREDENTIALS_ID")),
+		s3.WithCredentialsSecret(os.Getenv("S3_CREDENTIALS_SECRET")),
+	)
 	if err != nil {
 		t.Skip("unable to access S3; skipping test")
 	}
@@ -59,7 +64,10 @@ func TestDuplicateAccounts(t *testing.T) {
 	rand.Seed(time.Now().Unix())
 	// #nosec G404
 	id := fmt.Sprintf("%s-%d", t.Name(), rand.Int31())
-	store, err := s3.New(s3.WithID([]byte(id)))
+	store, err := s3.New(s3.WithID([]byte(id)),
+		s3.WithCredentialsID(os.Getenv("S3_CREDENTIALS_ID")),
+		s3.WithCredentialsSecret(os.Getenv("S3_CREDENTIALS_SECRET")),
+	)
 	if err != nil {
 		t.Skip("unable to access S3; skipping test")
 	}
@@ -85,7 +93,10 @@ func TestRetrieveNonExistentAccount(t *testing.T) {
 	rand.Seed(time.Now().Unix())
 	// #nosec G404
 	id := fmt.Sprintf("%s-%d", t.Name(), rand.Int31())
-	store, err := s3.New(s3.WithID([]byte(id)))
+	store, err := s3.New(s3.WithID([]byte(id)),
+		s3.WithCredentialsID(os.Getenv("S3_CREDENTIALS_ID")),
+		s3.WithCredentialsSecret(os.Getenv("S3_CREDENTIALS_SECRET")),
+	)
 	if err != nil {
 		t.Skip("unable to access S3; skipping test")
 	}
@@ -100,7 +111,10 @@ func TestStoreNonExistentAccount(t *testing.T) {
 	rand.Seed(time.Now().Unix())
 	// #nosec G404
 	id := fmt.Sprintf("%s-%d", t.Name(), rand.Int31())
-	store, err := s3.New(s3.WithID([]byte(id)))
+	store, err := s3.New(s3.WithID([]byte(id)),
+		s3.WithCredentialsID(os.Getenv("S3_CREDENTIALS_ID")),
+		s3.WithCredentialsSecret(os.Getenv("S3_CREDENTIALS_SECRET")),
+	)
 	if err != nil {
 		t.Skip("unable to access S3; skipping test")
 	}
@@ -123,11 +137,17 @@ func TestStoreAccount(t *testing.T) {
 	}{
 		{
 			name: "Defaults",
+			opts: []s3.Option{
+				s3.WithCredentialsID(os.Getenv("S3_CREDENTIALS_ID")),
+				s3.WithCredentialsSecret(os.Getenv("S3_CREDENTIALS_SECRET")),
+			},
 		},
 		{
 			name: "SpecificBucket",
 			opts: []s3.Option{
 				s3.WithBucket(fmt.Sprintf("teststoreaccount-specificbucket-%d", ts)),
+				s3.WithCredentialsID(os.Getenv("S3_CREDENTIALS_ID")),
+				s3.WithCredentialsSecret(os.Getenv("S3_CREDENTIALS_SECRET")),
 			},
 		},
 		{
@@ -135,6 +155,8 @@ func TestStoreAccount(t *testing.T) {
 			opts: []s3.Option{
 				s3.WithBucket(fmt.Sprintf("teststoreaccount-specificpath-%d", ts)),
 				s3.WithPath("a/b/c"),
+				s3.WithCredentialsID(os.Getenv("S3_CREDENTIALS_ID")),
+				s3.WithCredentialsSecret(os.Getenv("S3_CREDENTIALS_SECRET")),
 			},
 		},
 	}

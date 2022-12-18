@@ -16,6 +16,7 @@ package s3_test
 import (
 	"fmt"
 	"math/rand"
+	"os"
 	"testing"
 	"time"
 
@@ -27,7 +28,10 @@ import (
 
 func TestStoreRetrieveIndex(t *testing.T) {
 	rand.Seed(time.Now().Unix())
-	store, err := s3.New()
+	store, err := s3.New(
+		s3.WithCredentialsID(os.Getenv("S3_CREDENTIALS_ID")),
+		s3.WithCredentialsSecret(os.Getenv("S3_CREDENTIALS_SECRET")),
+	)
 	if err != nil {
 		t.Skip("unable to access S3; skipping test")
 	}

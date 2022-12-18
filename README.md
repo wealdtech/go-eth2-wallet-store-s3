@@ -74,10 +74,14 @@ func main() {
     e2wallet.UseStore(store)
 
     // Set up and use a store with a custom bucket and path
-    store, err = s3.New(
-      s3.WithBucket("my-store"),
-      s3.WithPath("data/keystore")
-    )
+    store, err = s3.New(s3.WithBucket("my-store"), s3.WithPath("data/keystore"))
+    if err != nil {
+        panic(err)
+    }
+    e2wallet.UseStore(store)
+
+    // Set up and use a store with non-dfeault credentials.
+    store, err = s3.New(s3.WithCredentialsID("ABCDEF"), s3.WithCredentialsSecret("XXXXXXXXXXXX"))
     if err != nil {
         panic(err)
     }

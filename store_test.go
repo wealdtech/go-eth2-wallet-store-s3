@@ -15,6 +15,7 @@ package s3_test
 
 import (
 	"fmt"
+	"os"
 	"testing"
 	"time"
 
@@ -25,15 +26,29 @@ import (
 )
 
 func TestNew(t *testing.T) {
-	store, err := s3.New()
+	store, err := s3.New(
+		s3.WithCredentialsID(os.Getenv("S3_CREDENTIALS_ID")),
+		s3.WithCredentialsSecret(os.Getenv("S3_CREDENTIALS_SECRET")),
+	)
 	if err != nil {
 		t.Skip("unable to access S3; skipping test")
 	}
 	assert.Equal(t, "s3", store.Name())
-	store, err = s3.New(s3.WithRegion("us-west-1"), s3.WithID([]byte("west")))
+	store, err = s3.New(
+		s3.WithCredentialsID(os.Getenv("S3_CREDENTIALS_ID")),
+		s3.WithCredentialsSecret(os.Getenv("S3_CREDENTIALS_SECRET")),
+		s3.WithRegion("us-west-1"),
+		s3.WithID([]byte("west")),
+	)
 	require.Nil(t, err)
 	assert.Equal(t, "s3", store.Name())
-	store, err = s3.New(s3.WithRegion("us-west-1"), s3.WithID([]byte("west")), s3.WithPassphrase([]byte("secret")))
+	store, err = s3.New(
+		s3.WithCredentialsID(os.Getenv("S3_CREDENTIALS_ID")),
+		s3.WithCredentialsSecret(os.Getenv("S3_CREDENTIALS_SECRET")),
+		s3.WithRegion("us-west-1"),
+		s3.WithID([]byte("west")),
+		s3.WithPassphrase([]byte("secret")),
+	)
 	require.Nil(t, err)
 	assert.Equal(t, "s3", store.Name())
 
@@ -51,13 +66,18 @@ func TestNewOptions(t *testing.T) {
 		location string
 	}{
 		{
-			name:     "Defaults",
-			opts:     []s3.Option{},
+			name: "Defaults",
+			opts: []s3.Option{
+				s3.WithCredentialsID(os.Getenv("S3_CREDENTIALS_ID")),
+				s3.WithCredentialsSecret(os.Getenv("S3_CREDENTIALS_SECRET")),
+			},
 			location: "f264781ef3f6e9b903723a3f6909c167d1d4667403e56a900d7ba02ddb97f44",
 		},
 		{
 			name: "SpecificBucket",
 			opts: []s3.Option{
+				s3.WithCredentialsID(os.Getenv("S3_CREDENTIALS_ID")),
+				s3.WithCredentialsSecret(os.Getenv("S3_CREDENTIALS_SECRET")),
 				s3.WithBucket(fmt.Sprintf("testnewoptions-specificbucket-%d", ts)),
 			},
 			location: fmt.Sprintf("testnewoptions-specificbucket-%d", ts),
@@ -65,6 +85,8 @@ func TestNewOptions(t *testing.T) {
 		{
 			name: "SpecificPath",
 			opts: []s3.Option{
+				s3.WithCredentialsID(os.Getenv("S3_CREDENTIALS_ID")),
+				s3.WithCredentialsSecret(os.Getenv("S3_CREDENTIALS_SECRET")),
 				s3.WithBucket(fmt.Sprintf("testnewoptions-specificpath-%d", ts)),
 				s3.WithPath("a/b/c"),
 			},
