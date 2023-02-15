@@ -1,4 +1,4 @@
-// Copyright 2019, 2020 Weald Technology Trading
+// Copyright 2019 - 2023 Weald Technology Trading
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -17,6 +17,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"strings"
+	"sync"
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/s3"
@@ -91,40 +92,64 @@ func (s *Store) RetrieveAccount(walletID uuid.UUID, accountID uuid.UUID) ([]byte
 // RetrieveAccounts retrieves all account-level data for a wallet.
 func (s *Store) RetrieveAccounts(walletID uuid.UUID) <-chan []byte {
 	path := s.walletPath(walletID)
-	ch := make(chan []byte, 1024)
+	ch := make(chan []byte, elementCapacity)
 	go func() {
 		conn := s3.New(s.session)
-		resp, err := conn.ListObjectsV2(&s3.ListObjectsV2Input{
-			Bucket: aws.String(s.bucket),
-			Prefix: aws.String(path + "/"),
+
+		contents := make([]*s3.Object, 0, elementCapacity)
+		var continuationToken *string
+		for finished := false; !finished; {
+			resp, err := conn.ListObjectsV2(&s3.ListObjectsV2Input{
+				Bucket:            aws.String(s.bucket),
+				Prefix:            aws.String(path + "/"),
+				ContinuationToken: continuationToken,
+			})
+			if err != nil {
+				close(ch)
+				return
+			}
+			contents = append(contents, resp.Contents...)
+			if resp.IsTruncated != nil && (*resp.IsTruncated) {
+				continuationToken = resp.NextContinuationToken
+			} else {
+				finished = true
+			}
+		}
+
+		// Download items concurrently (up to concurrency limit).
+		wg := sync.WaitGroup{}
+		downloader := s3manager.NewDownloader(s.session, func(d *s3manager.Downloader) {
+			d.Concurrency = downloadConcurrency
 		})
-		if err == nil {
-			for _, item := range resp.Contents {
-				if strings.HasSuffix(*item.Key, "/") {
-					// Directory
-					continue
-				}
-				if strings.HasSuffix(*item.Key, walletID.String()) {
-					// Wallet
-					continue
-				}
-				buf := aws.NewWriteAtBuffer([]byte{})
-				downloader := s3manager.NewDownloader(s.session)
+		for _, content := range contents {
+			if strings.HasSuffix(*content.Key, "/") {
+				// Directory
+				continue
+			}
+			if strings.HasSuffix(*content.Key, walletID.String()) {
+				// Wallet
+				continue
+			}
+			wg.Add(1)
+			go func(content *s3.Object) {
+				defer wg.Done()
+				buf := aws.NewWriteAtBuffer(make([]byte, 0, itemCapacity))
 				_, err := downloader.Download(buf,
 					&s3.GetObjectInput{
 						Bucket: aws.String(s.bucket),
-						Key:    aws.String(*item.Key),
+						Key:    aws.String(*content.Key),
 					})
 				if err != nil {
-					continue
+					return
 				}
 				data, err := s.decryptIfRequired(buf.Bytes())
 				if err != nil {
-					continue
+					return
 				}
 				ch <- data
-			}
+			}(content)
 		}
+		wg.Wait()
 		close(ch)
 	}()
 	return ch

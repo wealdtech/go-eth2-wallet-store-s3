@@ -1,4 +1,4 @@
-// Copyright 2019 - 2022 Weald Technology Trading
+// Copyright 2019 - 2023 Weald Technology Trading
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -27,8 +27,8 @@ import (
 )
 
 func TestStoreRetrieveAccount(t *testing.T) {
-	rand.Seed(time.Now().Unix())
 	//nolint:gosec
+	rand := rand.New(rand.NewSource(time.Now().Unix()))
 	id := fmt.Sprintf("%s-%d", t.Name(), rand.Int31())
 	store, err := s3.New(
 		s3.WithID([]byte(id)),
@@ -61,8 +61,8 @@ func TestStoreRetrieveAccount(t *testing.T) {
 }
 
 func TestDuplicateAccounts(t *testing.T) {
-	rand.Seed(time.Now().Unix())
-	// #nosec G404
+	//nolint:gosec
+	rand := rand.New(rand.NewSource(time.Now().Unix()))
 	id := fmt.Sprintf("%s-%d", t.Name(), rand.Int31())
 	store, err := s3.New(s3.WithID([]byte(id)),
 		s3.WithCredentialsID(os.Getenv("S3_CREDENTIALS_ID")),
@@ -90,8 +90,8 @@ func TestDuplicateAccounts(t *testing.T) {
 }
 
 func TestRetrieveNonExistentAccount(t *testing.T) {
-	rand.Seed(time.Now().Unix())
-	// #nosec G404
+	//nolint:gosec
+	rand := rand.New(rand.NewSource(time.Now().Unix()))
 	id := fmt.Sprintf("%s-%d", t.Name(), rand.Int31())
 	store, err := s3.New(s3.WithID([]byte(id)),
 		s3.WithCredentialsID(os.Getenv("S3_CREDENTIALS_ID")),
@@ -108,8 +108,8 @@ func TestRetrieveNonExistentAccount(t *testing.T) {
 }
 
 func TestStoreNonExistentAccount(t *testing.T) {
-	rand.Seed(time.Now().Unix())
-	// #nosec G404
+	//nolint:gosec
+	rand := rand.New(rand.NewSource(time.Now().Unix()))
 	id := fmt.Sprintf("%s-%d", t.Name(), rand.Int31())
 	store, err := s3.New(s3.WithID([]byte(id)),
 		s3.WithCredentialsID(os.Getenv("S3_CREDENTIALS_ID")),

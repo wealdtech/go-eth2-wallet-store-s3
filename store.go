@@ -1,4 +1,4 @@
-// Copyright 2019 - 2022 Weald Technology Trading
+// Copyright 2019 - 2023 Weald Technology Trading
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -26,6 +26,12 @@ import (
 	"github.com/pkg/errors"
 	util "github.com/wealdtech/go-eth2-util"
 	wtypes "github.com/wealdtech/go-eth2-wallet-types/v2"
+)
+
+var (
+	downloadConcurrency = 64
+	elementCapacity     = 16384
+	itemCapacity        = 2048
 )
 
 // options are the options for the S3 store
@@ -122,14 +128,15 @@ type Store struct {
 
 // New creates a new Amazon S3-compatible store.
 // This takes the following options:
-//  - region: a string specifying the Amazon S3 region, defaults to "us-east-1", set with WithRegion()
-//  - id: a byte array specifying an identifying key for the store, defaults to nil, set with WithID()
-//  - passphrase: a key used to encrypt all data written to the store, defaults to blank and no additional encryption
-//  - bucket: the name of a bucket to create, defaults to one generated using the credentials and ID
-//  - path: a path inside the bucket in which to place wallets, defaults to the root of the bucket
-//  - endpoint: a URL for an S3-compatible service to use in place of S3 itself
-//  - credentials ID: AWS access credentials ID
-//  - credentials secret: AWS access credentials secret
+//   - region: a string specifying the Amazon S3 region, defaults to "us-east-1", set with WithRegion()
+//   - id: a byte array specifying an identifying key for the store, defaults to nil, set with WithID()
+//   - passphrase: a key used to encrypt all data written to the store, defaults to blank and no additional encryption
+//   - bucket: the name of a bucket to create, defaults to one generated using the credentials and ID
+//   - path: a path inside the bucket in which to place wallets, defaults to the root of the bucket
+//   - endpoint: a URL for an S3-compatible service to use in place of S3 itself
+//   - credentials ID: AWS access credentials ID
+//   - credentials secret: AWS access credentials secret
+//
 // If credentials are not supplied, the access credentials should be in a standard place, e.g. ~/.aws/credentials
 func New(opts ...Option) (wtypes.Store, error) {
 	options := options{

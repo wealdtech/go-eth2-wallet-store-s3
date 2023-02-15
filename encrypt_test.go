@@ -27,8 +27,8 @@ import (
 )
 
 func TestStoreRetrieveEncryptedWallet(t *testing.T) {
-	rand.Seed(time.Now().Unix())
-	// #nosec G404
+	//nolint:gosec
+	rand := rand.New(rand.NewSource(time.Now().Unix()))
 	id := fmt.Sprintf("%s-%d", t.Name(), rand.Int31())
 	store, err := s3.New(s3.WithID([]byte(id)),
 		s3.WithPassphrase([]byte("test")),
@@ -59,8 +59,8 @@ func TestStoreRetrieveEncryptedWallet(t *testing.T) {
 }
 
 func TestStoreRetrieveEncryptedAccount(t *testing.T) {
-	rand.Seed(time.Now().Unix())
-	// #nosec G404
+	//nolint:gosec
+	rand := rand.New(rand.NewSource(time.Now().Unix()))
 	id := fmt.Sprintf("%s-%d", t.Name(), rand.Int31())
 	store, err := s3.New(s3.WithID([]byte(id)),
 		s3.WithPassphrase([]byte("test")),
@@ -95,8 +95,8 @@ func TestStoreRetrieveEncryptedAccount(t *testing.T) {
 }
 
 func TestBadWalletKey(t *testing.T) {
-	rand.Seed(time.Now().Unix())
-	// #nosec G404
+	//nolint:gosec
+	rand := rand.New(rand.NewSource(time.Now().Unix()))
 	id := fmt.Sprintf("%s-%d", t.Name(), rand.Int31())
 	store, err := s3.New(s3.WithID([]byte(id)),
 		s3.WithPassphrase([]byte("test")),

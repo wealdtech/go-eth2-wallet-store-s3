@@ -1,4 +1,4 @@
-// Copyright 2019, 2020 Weald Technology Trading
+// Copyright 2019 - 2023 Weald Technology Trading
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -15,10 +15,8 @@ package s3_test
 
 import (
 	"fmt"
-	"math/rand"
 	"os"
 	"testing"
-	"time"
 
 	"github.com/google/uuid"
 	"github.com/stretchr/testify/require"
@@ -27,7 +25,6 @@ import (
 )
 
 func TestStoreRetrieveIndex(t *testing.T) {
-	rand.Seed(time.Now().Unix())
 	store, err := s3.New(
 		s3.WithCredentialsID(os.Getenv("S3_CREDENTIALS_ID")),
 		s3.WithCredentialsSecret(os.Getenv("S3_CREDENTIALS_SECRET")),
