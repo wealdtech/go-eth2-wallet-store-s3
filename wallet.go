@@ -29,7 +29,7 @@ import (
 // StoreWallet stores wallet-level data.  It will fail if it cannot store the data.
 // Note that this will overwrite any existing data; it is up to higher-level functions to check for the presence of a wallet with
 // the wallet name and handle clashes accordingly.
-func (s *Store) StoreWallet(id uuid.UUID, name string, data []byte) error {
+func (s *Store) StoreWallet(id uuid.UUID, _ string, data []byte) error {
 	path := s.walletHeaderPath(id)
 	var err error
 	data, err = s.encryptIfRequired(data)

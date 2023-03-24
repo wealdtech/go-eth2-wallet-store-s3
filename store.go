@@ -34,7 +34,7 @@ var (
 	itemCapacity        = 2048
 )
 
-// options are the options for the S3 store
+// options are the options for the S3 store.
 type options struct {
 	id                []byte
 	endpoint          string
@@ -46,7 +46,7 @@ type options struct {
 	credentialsSecret string
 }
 
-// Option gives options to New
+// Option gives options to New.
 type Option interface {
 	apply(*options)
 }
@@ -64,21 +64,21 @@ func WithPassphrase(passphrase []byte) Option {
 	})
 }
 
-// WithID sets the ID for the store
+// WithID sets the ID for the store.
 func WithID(t []byte) Option {
 	return optionFunc(func(o *options) {
 		o.id = t
 	})
 }
 
-// WithEndpoint sets the endpoint for the store
+// WithEndpoint sets the endpoint for the store.
 func WithEndpoint(t string) Option {
 	return optionFunc(func(o *options) {
 		o.endpoint = t
 	})
 }
 
-// WithRegion sets the AWS region for the store
+// WithRegion sets the AWS region for the store.
 // This defaults to "us-east-1", and cannot be overridden by an empty string.
 func WithRegion(t string) Option {
 	return optionFunc(func(o *options) {
@@ -88,15 +88,15 @@ func WithRegion(t string) Option {
 	})
 }
 
-// WithBucket sets the bucket for the store
+// WithBucket sets the bucket for the store.
 func WithBucket(t string) Option {
 	return optionFunc(func(o *options) {
 		o.bucket = t
 	})
 }
 
-// WithPath sets the path for the store
-// If not supplied this will default to an accout-specific path
+// WithPath sets the path for the store.
+// If not supplied this will default to an accout-specific path.
 func WithPath(t string) Option {
 	return optionFunc(func(o *options) {
 		o.path = t
@@ -137,7 +137,7 @@ type Store struct {
 //   - credentials ID: AWS access credentials ID
 //   - credentials secret: AWS access credentials secret
 //
-// If credentials are not supplied, the access credentials should be in a standard place, e.g. ~/.aws/credentials
+// If credentials are not supplied, the access credentials should be in a standard place, e.g. ~/.aws/credentials .
 func New(opts ...Option) (wtypes.Store, error) {
 	options := options{
 		region: "us-east-1",
@@ -179,7 +179,7 @@ func New(opts ...Option) (wtypes.Store, error) {
 		bucket = hex.EncodeToString(hash)[:63]
 	}
 
-	// Check the bucket exists; if not create it
+	// Check the bucket exists; if not create it.
 	conn := s3.New(session)
 	_, err = conn.GetBucketAcl(&s3.GetBucketAclInput{Bucket: &bucket})
 	if err != nil {
