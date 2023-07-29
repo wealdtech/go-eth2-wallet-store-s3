@@ -1,4 +1,4 @@
-// Copyright 2019, 2020 Weald Technology Trading
+// Copyright 2019 - 2023 Weald Technology Trading.
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -14,38 +14,55 @@
 package s3
 
 import (
-	"github.com/pkg/errors"
+	"errors"
+
 	"github.com/wealdtech/go-ecodec"
 )
 
 // encryptIfRequired encrypts data if required.
 func (s *Store) encryptIfRequired(data []byte) ([]byte, error) {
 	if len(data) == 0 {
+		// No data means nothing to encrypt.
 		return data, nil
 	}
+
+	if len(s.passphrase) == 0 {
+		// No passphrase means nothing to encrypt with.
+		return data, nil
+	}
+
 	if len(data) < 16 {
 		return nil, errors.New("data must be at least 16 bytes")
 	}
+
 	var err error
-	if len(s.passphrase) > 0 {
-		data, err = ecodec.Encrypt(data, s.passphrase)
+	if data, err = ecodec.Encrypt(data, s.passphrase); err != nil {
+		return nil, err
 	}
 
-	return data, err
+	return data, nil
 }
 
 // decryptIfRequired decrypts data if required.
 func (s *Store) decryptIfRequired(data []byte) ([]byte, error) {
 	if len(data) == 0 {
+		// No data means nothing to decrypt.
 		return data, nil
 	}
+
+	if len(s.passphrase) == 0 {
+		// No passphrase means nothing to decrypt with.
+		return data, nil
+	}
+
 	if len(data) < 16 {
 		return nil, errors.New("data must be at least 16 bytes")
 	}
+
 	var err error
-	if len(s.passphrase) > 0 {
-		data, err = ecodec.Decrypt(data, s.passphrase)
+	if data, err = ecodec.Decrypt(data, s.passphrase); err != nil {
+		return nil, err
 	}
 
-	return data, err
+	return data, nil
 }

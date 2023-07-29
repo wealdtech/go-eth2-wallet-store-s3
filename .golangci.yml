@@ -135,6 +135,7 @@ linters:
     - exhaustivestruct
     - exhaustruct
     - funlen
+    - goerr113
     - golint
     - gomnd
     - ifshort
