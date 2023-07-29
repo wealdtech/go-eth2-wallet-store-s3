@@ -45,6 +45,7 @@ func (s *Store) StoreWallet(id uuid.UUID, _ string, data []byte) error {
 	if err != nil {
 		return errors.Wrap(err, "failed to store wallet")
 	}
+
 	return nil
 }
 
@@ -59,6 +60,7 @@ func (s *Store) RetrieveWallet(walletName string) ([]byte, error) {
 			return data, nil
 		}
 	}
+
 	return nil, errors.New("wallet not found")
 }
 
@@ -73,6 +75,7 @@ func (s *Store) RetrieveWalletByID(walletID uuid.UUID) ([]byte, error) {
 			return data, nil
 		}
 	}
+
 	return nil, errors.New("wallet not found")
 }
 
@@ -139,5 +142,6 @@ func (s *Store) RetrieveWallets() <-chan []byte {
 		wg.Wait()
 		close(ch)
 	}()
+
 	return ch
 }

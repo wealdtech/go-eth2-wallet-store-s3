@@ -30,6 +30,7 @@ func (s *Store) encryptIfRequired(data []byte) ([]byte, error) {
 	if len(s.passphrase) > 0 {
 		data, err = ecodec.Encrypt(data, s.passphrase)
 	}
+
 	return data, err
 }
 
@@ -45,5 +46,6 @@ func (s *Store) decryptIfRequired(data []byte) ([]byte, error) {
 	if len(s.passphrase) > 0 {
 		data, err = ecodec.Decrypt(data, s.passphrase)
 	}
+
 	return data, err
 }

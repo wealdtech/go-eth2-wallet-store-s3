@@ -44,6 +44,7 @@ func (s *Store) StoreAccountsIndex(walletID uuid.UUID, data []byte) error {
 	}); err != nil {
 		return errors.Wrap(err, "failed to store wallet index")
 	}
+
 	return nil
 }
 
@@ -68,5 +69,6 @@ func (s *Store) RetrieveAccountsIndex(walletID uuid.UUID) ([]byte, error) {
 	if data, err = s.decryptIfRequired(data); err != nil {
 		return nil, err
 	}
+
 	return data, nil
 }

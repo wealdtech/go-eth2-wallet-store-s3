@@ -67,6 +67,7 @@ func (s *Store) StoreAccount(walletID uuid.UUID, accountID uuid.UUID, data []byt
 	if err != nil {
 		return errors.Wrap(err, "failed to store key")
 	}
+
 	return nil
 }
 
@@ -86,6 +87,7 @@ func (s *Store) RetrieveAccount(walletID uuid.UUID, accountID uuid.UUID) ([]byte
 	if err != nil {
 		return nil, err
 	}
+
 	return data, nil
 }
 
@@ -152,5 +154,6 @@ func (s *Store) RetrieveAccounts(walletID uuid.UUID) <-chan []byte {
 		wg.Wait()
 		close(ch)
 	}()
+
 	return ch
 }
