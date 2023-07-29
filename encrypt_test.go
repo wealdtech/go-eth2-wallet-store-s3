@@ -1,4 +1,4 @@
-// Copyright 2019, 2020 Weald Technology Trading
+// Copyright 2019 - 2023 Weald Technology Trading.
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -34,13 +34,14 @@ func TestStoreRetrieveEncryptedWallet(t *testing.T) {
 		s3.WithPassphrase([]byte("test")),
 		s3.WithCredentialsID(os.Getenv("S3_CREDENTIALS_ID")),
 		s3.WithCredentialsSecret(os.Getenv("S3_CREDENTIALS_SECRET")),
+		s3.WithBucket(os.Getenv("S3_BUCKET")),
 	)
 	if err != nil {
 		t.Skip("unable to access S3; skipping test")
 	}
 
 	walletID := uuid.New()
-	walletName := "test"
+	walletName := fmt.Sprintf("test wallet for TestStoreRetrieveEncryptedWallet %d", time.Now().UnixNano())
 	data := []byte(fmt.Sprintf(`{"uuid":%q,"name":%q}`, walletID, walletName))
 
 	err = store.StoreWallet(walletID, walletName, data)
@@ -66,13 +67,14 @@ func TestStoreRetrieveEncryptedAccount(t *testing.T) {
 		s3.WithPassphrase([]byte("test")),
 		s3.WithCredentialsID(os.Getenv("S3_CREDENTIALS_ID")),
 		s3.WithCredentialsSecret(os.Getenv("S3_CREDENTIALS_SECRET")),
+		s3.WithBucket(os.Getenv("S3_BUCKET")),
 	)
 	if err != nil {
 		t.Skip("unable to access S3; skipping test")
 	}
 
 	walletID := uuid.New()
-	walletName := "test wallet"
+	walletName := fmt.Sprintf("test wallet for TestStoreRetrieveEncryptedAccount %d", time.Now().UnixNano())
 	walletData := []byte(fmt.Sprintf(`{"name":%q,"uuid":%q}`, walletName, walletID.String()))
 	accountID := uuid.New()
 	accountName := "test account"
@@ -102,13 +104,14 @@ func TestBadWalletKey(t *testing.T) {
 		s3.WithPassphrase([]byte("test")),
 		s3.WithCredentialsID(os.Getenv("S3_CREDENTIALS_ID")),
 		s3.WithCredentialsSecret(os.Getenv("S3_CREDENTIALS_SECRET")),
+		s3.WithBucket(os.Getenv("S3_BUCKET")),
 	)
 	if err != nil {
 		t.Skip("unable to access S3; skipping test")
 	}
 
 	walletID := uuid.New()
-	walletName := "test wallet"
+	walletName := fmt.Sprintf("test wallet for TestBadWalletKey %d", time.Now().UnixNano())
 	data := []byte(fmt.Sprintf(`{"uuid":%q,"name":%q}`, walletID, walletName))
 
 	err = store.StoreWallet(walletID, walletName, data)
@@ -119,6 +122,7 @@ func TestBadWalletKey(t *testing.T) {
 		s3.WithPassphrase([]byte("badkey")),
 		s3.WithCredentialsID(os.Getenv("S3_CREDENTIALS_ID")),
 		s3.WithCredentialsSecret(os.Getenv("S3_CREDENTIALS_SECRET")),
+		s3.WithBucket(os.Getenv("S3_BUCKET")),
 	)
 	require.Nil(t, err)
 	_, err = store.RetrieveWallet(walletName)

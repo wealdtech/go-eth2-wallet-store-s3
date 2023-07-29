@@ -34,13 +34,14 @@ func TestStoreRetrieveAccount(t *testing.T) {
 		s3.WithID([]byte(id)),
 		s3.WithCredentialsID(os.Getenv("S3_CREDENTIALS_ID")),
 		s3.WithCredentialsSecret(os.Getenv("S3_CREDENTIALS_SECRET")),
+		s3.WithBucket(os.Getenv("S3_BUCKET")),
 	)
 	if err != nil {
 		t.Skip("unable to access S3; skipping test")
 	}
 
 	walletID := uuid.New()
-	walletName := "test wallet"
+	walletName := fmt.Sprintf("test wallet for TestStoreRetrieveAccount %d", time.Now().UnixNano())
 	walletData := []byte(fmt.Sprintf(`{"name":%q,"uuid":%q}`, walletName, walletID.String()))
 	accountID := uuid.New()
 	accountName := "test account"
@@ -67,13 +68,14 @@ func TestDuplicateAccounts(t *testing.T) {
 	store, err := s3.New(s3.WithID([]byte(id)),
 		s3.WithCredentialsID(os.Getenv("S3_CREDENTIALS_ID")),
 		s3.WithCredentialsSecret(os.Getenv("S3_CREDENTIALS_SECRET")),
+		s3.WithBucket(os.Getenv("S3_BUCKET")),
 	)
 	if err != nil {
 		t.Skip("unable to access S3; skipping test")
 	}
 
 	walletID := uuid.New()
-	walletName := "test wallet"
+	walletName := fmt.Sprintf("test wallet for TestDuplicateAccounts %d", time.Now().UnixNano())
 	walletData := []byte(fmt.Sprintf(`{"name":%q,"uuid":%q}`, walletName, walletID.String()))
 	accountID := uuid.New()
 	accountName := "test account"
@@ -96,6 +98,7 @@ func TestRetrieveNonExistentAccount(t *testing.T) {
 	store, err := s3.New(s3.WithID([]byte(id)),
 		s3.WithCredentialsID(os.Getenv("S3_CREDENTIALS_ID")),
 		s3.WithCredentialsSecret(os.Getenv("S3_CREDENTIALS_SECRET")),
+		s3.WithBucket(os.Getenv("S3_BUCKET")),
 	)
 	if err != nil {
 		t.Skip("unable to access S3; skipping test")
@@ -114,6 +117,7 @@ func TestStoreNonExistentAccount(t *testing.T) {
 	store, err := s3.New(s3.WithID([]byte(id)),
 		s3.WithCredentialsID(os.Getenv("S3_CREDENTIALS_ID")),
 		s3.WithCredentialsSecret(os.Getenv("S3_CREDENTIALS_SECRET")),
+		s3.WithBucket(os.Getenv("S3_BUCKET")),
 	)
 	if err != nil {
 		t.Skip("unable to access S3; skipping test")
@@ -129,7 +133,11 @@ func TestStoreNonExistentAccount(t *testing.T) {
 }
 
 func TestStoreAccount(t *testing.T) {
-	ts := time.Now().UnixNano()
+	if os.Getenv("S3_CREDENTIALS_ID") == "" ||
+		os.Getenv("S3_CREDENTIALS_SECRET") == "" {
+		t.Skip("unable to access S3; skipping test")
+	}
+
 	tests := []struct {
 		name string
 		opts []s3.Option
@@ -138,6 +146,7 @@ func TestStoreAccount(t *testing.T) {
 		{
 			name: "Defaults",
 			opts: []s3.Option{
+				s3.WithID([]byte(fmt.Sprintf("%d", rand.Int31()))),
 				s3.WithCredentialsID(os.Getenv("S3_CREDENTIALS_ID")),
 				s3.WithCredentialsSecret(os.Getenv("S3_CREDENTIALS_SECRET")),
 			},
@@ -145,18 +154,20 @@ func TestStoreAccount(t *testing.T) {
 		{
 			name: "SpecificBucket",
 			opts: []s3.Option{
-				s3.WithBucket(fmt.Sprintf("teststoreaccount-specificbucket-%d", ts)),
+				s3.WithID([]byte(fmt.Sprintf("%d", rand.Int31()))),
 				s3.WithCredentialsID(os.Getenv("S3_CREDENTIALS_ID")),
 				s3.WithCredentialsSecret(os.Getenv("S3_CREDENTIALS_SECRET")),
+				s3.WithBucket(fmt.Sprintf("teststoreaccount-specificbucket-%d", time.Now().UnixNano())),
 			},
 		},
 		{
 			name: "SpecificPath",
 			opts: []s3.Option{
-				s3.WithBucket(fmt.Sprintf("teststoreaccount-specificpath-%d", ts)),
-				s3.WithPath("a/b/c"),
+				s3.WithID([]byte(fmt.Sprintf("%d", rand.Int31()))),
 				s3.WithCredentialsID(os.Getenv("S3_CREDENTIALS_ID")),
 				s3.WithCredentialsSecret(os.Getenv("S3_CREDENTIALS_SECRET")),
+				s3.WithBucket(fmt.Sprintf("teststoreaccount-specificpath-%d", time.Now().UnixNano())),
+				s3.WithPath("a/b/c"),
 			},
 		},
 	}
@@ -167,8 +178,8 @@ func TestStoreAccount(t *testing.T) {
 			require.NoError(t, err)
 
 			walletID := uuid.New()
-			walletName := "test wallet"
-			walletData := []byte(fmt.Sprintf(`{"uuid":%q,"name":%q}`, walletID, walletName))
+			walletName := fmt.Sprintf("test wallet for TestStoreAccount/%s %d", test.name, time.Now().UnixNano())
+			walletData := []byte(fmt.Sprintf(`{"name":%q,"uuid":%q}`, walletName, walletID))
 			require.NoError(t, store.StoreWallet(walletID, walletName, walletData))
 			retData, err := store.RetrieveWallet(walletName)
 			require.NoError(t, err)

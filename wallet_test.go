@@ -1,4 +1,4 @@
-// Copyright 2019 - 2022 Weald Technology Trading
+// Copyright 2019 - 2023 Weald Technology Trading.
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -15,6 +15,7 @@ package s3_test
 
 import (
 	"fmt"
+	"math/rand"
 	"os"
 	"testing"
 	"time"
@@ -26,7 +27,11 @@ import (
 )
 
 func TestStoreWallet(t *testing.T) {
-	ts := time.Now().UnixNano()
+	if os.Getenv("S3_CREDENTIALS_ID") == "" ||
+		os.Getenv("S3_CREDENTIALS_SECRET") == "" {
+		t.Skip("unable to access S3; skipping test")
+	}
+
 	tests := []struct {
 		name string
 		opts []s3.Option
@@ -34,21 +39,28 @@ func TestStoreWallet(t *testing.T) {
 	}{
 		{
 			name: "Defaults",
+			opts: []s3.Option{
+				s3.WithID([]byte(fmt.Sprintf("%d", rand.Int31()))),
+				s3.WithCredentialsID(os.Getenv("S3_CREDENTIALS_ID")),
+				s3.WithCredentialsSecret(os.Getenv("S3_CREDENTIALS_SECRET")),
+			},
 		},
 		{
 			name: "SpecificBucket",
 			opts: []s3.Option{
+				s3.WithID([]byte(fmt.Sprintf("%d", rand.Int31()))),
 				s3.WithCredentialsID(os.Getenv("S3_CREDENTIALS_ID")),
 				s3.WithCredentialsSecret(os.Getenv("S3_CREDENTIALS_SECRET")),
-				s3.WithBucket(fmt.Sprintf("teststorewallet-specificbucket-%d", ts)),
+				s3.WithBucket(fmt.Sprintf("teststorewallet-specificbucket-%d", time.Now().UnixNano())),
 			},
 		},
 		{
 			name: "SpecificPath",
 			opts: []s3.Option{
+				s3.WithID([]byte(fmt.Sprintf("%d", rand.Int31()))),
 				s3.WithCredentialsID(os.Getenv("S3_CREDENTIALS_ID")),
 				s3.WithCredentialsSecret(os.Getenv("S3_CREDENTIALS_SECRET")),
-				s3.WithBucket(fmt.Sprintf("teststorewallet-specificpath-%d", ts)),
+				s3.WithBucket(os.Getenv("S3_BUCKET")),
 				s3.WithPath("a/b/c"),
 			},
 		},
@@ -60,8 +72,8 @@ func TestStoreWallet(t *testing.T) {
 			require.NoError(t, err)
 
 			walletID := uuid.New()
-			walletName := "test wallet"
-			data := []byte(fmt.Sprintf(`{"uuid":%q,"name":%q}`, walletID, walletName))
+			walletName := fmt.Sprintf("test wallet for TestStoreWallet/%s %d", test.name, time.Now().UnixNano())
+			data := []byte(fmt.Sprintf(`{"name":%q,"uuid":%q}`, walletName, walletID))
 			err = store.StoreWallet(walletID, walletName, data)
 			require.Nil(t, err)
 			retData, err := store.RetrieveWallet(walletName)

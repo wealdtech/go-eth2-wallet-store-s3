@@ -1,4 +1,4 @@
-// Copyright 2019, 2020 Weald Technology Trading
+// Copyright 2019 - 2023 Weald Technology Trading.
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -26,6 +26,11 @@ import (
 )
 
 func TestNew(t *testing.T) {
+	if os.Getenv("S3_CREDENTIALS_ID") == "" ||
+		os.Getenv("S3_CREDENTIALS_SECRET") == "" {
+		t.Skip("unable to access S3; skipping test")
+	}
+
 	store, err := s3.New(
 		s3.WithCredentialsID(os.Getenv("S3_CREDENTIALS_ID")),
 		s3.WithCredentialsSecret(os.Getenv("S3_CREDENTIALS_SECRET")),
@@ -54,10 +59,15 @@ func TestNew(t *testing.T) {
 
 	storeLocationProvider, ok := store.(wtypes.StoreLocationProvider)
 	assert.True(t, ok)
-	assert.Equal(t, "67038ae26ce874153859c347eebba98cebd31639b3a959c42d6b47e0452b185", storeLocationProvider.Location())
+	assert.Equal(t, "eb496be46d940d33068bdac263d7b990de5f99db68abeaae002d9d7d62c26b6", storeLocationProvider.Location())
 }
 
 func TestNewOptions(t *testing.T) {
+	if os.Getenv("S3_CREDENTIALS_ID") == "" ||
+		os.Getenv("S3_CREDENTIALS_SECRET") == "" {
+		t.Skip("unable to access S3; skipping test")
+	}
+
 	ts := time.Now().UnixNano()
 	tests := []struct {
 		name     string
@@ -71,7 +81,7 @@ func TestNewOptions(t *testing.T) {
 				s3.WithCredentialsID(os.Getenv("S3_CREDENTIALS_ID")),
 				s3.WithCredentialsSecret(os.Getenv("S3_CREDENTIALS_SECRET")),
 			},
-			location: "f264781ef3f6e9b903723a3f6909c167d1d4667403e56a900d7ba02ddb97f44",
+			location: "6f6765e9f7c404448be63ccb049b3f95b4a95e1ff87b57c4d20c64b579f11f0",
 		},
 		{
 			name: "SpecificBucket",

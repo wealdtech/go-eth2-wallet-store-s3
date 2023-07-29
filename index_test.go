@@ -17,6 +17,7 @@ import (
 	"fmt"
 	"os"
 	"testing"
+	"time"
 
 	"github.com/google/uuid"
 	"github.com/stretchr/testify/require"
@@ -28,13 +29,14 @@ func TestStoreRetrieveIndex(t *testing.T) {
 	store, err := s3.New(
 		s3.WithCredentialsID(os.Getenv("S3_CREDENTIALS_ID")),
 		s3.WithCredentialsSecret(os.Getenv("S3_CREDENTIALS_SECRET")),
+		s3.WithBucket(os.Getenv("S3_BUCKET")),
 	)
 	if err != nil {
 		t.Skip("unable to access S3; skipping test")
 	}
 
 	walletID := uuid.New()
-	walletName := "test wallet"
+	walletName := fmt.Sprintf("test wallet for TestStoreRetrieveIndex %d", time.Now().UnixNano())
 	walletData := []byte(fmt.Sprintf(`{"name":%q,"uuid":%q}`, walletName, walletID.String()))
 	accountID := uuid.New()
 	accountName := "test account"

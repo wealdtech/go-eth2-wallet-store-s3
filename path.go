@@ -32,6 +32,10 @@ func (s *Store) walletIndexPath(walletID uuid.UUID) string {
 	return join(s.walletPath(walletID), "index")
 }
 
+func (s *Store) walletBatchPath(walletID uuid.UUID) string {
+	return join(s.walletPath(walletID), "batch")
+}
+
 // join joins multiple segments of a path.
 func join(elem ...string) string {
 	res := ""
