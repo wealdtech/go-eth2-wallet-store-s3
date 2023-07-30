@@ -124,32 +124,39 @@ func (s *Store) RetrieveAccounts(walletID uuid.UUID) <-chan []byte {
 			d.Concurrency = downloadConcurrency
 		})
 		for _, content := range contents {
-			if strings.HasSuffix(*content.Key, "/") {
-				// Directory
+			switch {
+			case strings.HasSuffix(*content.Key, "/"):
+				// Directory.
 				continue
-			}
-			if strings.HasSuffix(*content.Key, walletID.String()) {
-				// Wallet
+			case strings.HasSuffix(*content.Key, walletID.String()):
+				// Wallet object.
 				continue
+			case strings.HasSuffix(*content.Key, "index"):
+				// Index object.
+				continue
+			case strings.HasSuffix(*content.Key, "batch"):
+				// Batch object.
+				continue
+			default:
+				wg.Add(1)
+				go func(content *s3.Object) {
+					defer wg.Done()
+					buf := aws.NewWriteAtBuffer(make([]byte, 0, itemCapacity))
+					_, err := downloader.Download(buf,
+						&s3.GetObjectInput{
+							Bucket: aws.String(s.bucket),
+							Key:    aws.String(*content.Key),
+						})
+					if err != nil {
+						return
+					}
+					data, err := s.decryptIfRequired(buf.Bytes())
+					if err != nil {
+						return
+					}
+					ch <- data
+				}(content)
 			}
-			wg.Add(1)
-			go func(content *s3.Object) {
-				defer wg.Done()
-				buf := aws.NewWriteAtBuffer(make([]byte, 0, itemCapacity))
-				_, err := downloader.Download(buf,
-					&s3.GetObjectInput{
-						Bucket: aws.String(s.bucket),
-						Key:    aws.String(*content.Key),
-					})
-				if err != nil {
-					return
-				}
-				data, err := s.decryptIfRequired(buf.Bytes())
-				if err != nil {
-					return
-				}
-				ch <- data
-			}(content)
 		}
 		wg.Wait()
 		close(ch)
