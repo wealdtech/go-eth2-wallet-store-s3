@@ -118,7 +118,7 @@ func WithCredentialsSecret(t string) Option {
 	})
 }
 
-// WithForcePathStyle sets the path style switch
+// WithForcePathStyle sets whether to force the request to use path-style addressing.
 func WithForcePathStyle(t bool) Option {
 	return optionFunc(func(o *options) {
 		o.forcePathStyle = t
