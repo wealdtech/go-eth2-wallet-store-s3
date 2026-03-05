@@ -44,6 +44,7 @@ type options struct {
 	passphrase        []byte
 	credentialsID     string
 	credentialsSecret string
+	forcePathStyle    bool
 }
 
 // Option gives options to New.
@@ -117,6 +118,13 @@ func WithCredentialsSecret(t string) Option {
 	})
 }
 
+// WithForcePathStyle sets whether to force the request to use path-style addressing.
+func WithForcePathStyle(t bool) Option {
+	return optionFunc(func(o *options) {
+		o.forcePathStyle = t
+	})
+}
+
 // Store is the store for the wallet held encrypted on Amazon S3.
 type Store struct {
 	session    *session.Session
@@ -147,8 +155,9 @@ func New(opts ...Option) (wtypes.Store, error) {
 	}
 
 	sessionConfig := &aws.Config{
-		Region:   aws.String(options.region),
-		Endpoint: aws.String(options.endpoint),
+		Region:           aws.String(options.region),
+		Endpoint:         aws.String(options.endpoint),
+		S3ForcePathStyle: aws.Bool(options.forcePathStyle),
 	}
 
 	if len(options.credentialsID) > 0 {
